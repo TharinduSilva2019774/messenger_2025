@@ -4,6 +4,7 @@ import "./globals.css";
 import { GlobalProvider } from "./Providers/globalProvidor";
 import SideBar from "./Components/SideBar";
 import ContextProvidor from "./Providers/ContextProvidor";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,15 +27,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    <ClerkProvider>
     <html lang="en">
       <GlobalProvider> 
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className=" flex gap-10 h-full min-h-screen transition-all duration-300 ease-in-out"
       >
         <SideBar />
         {children}
       </body>
       </GlobalProvider>
     </html>
+    </ClerkProvider>
   );
 }

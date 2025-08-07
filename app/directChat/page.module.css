@@ -1,0 +1,12 @@
+.h1 {
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    padding: 1rem;
+}
+
+.mainContainer {
+    display: flex;
+    flex-direction: column;
+}
