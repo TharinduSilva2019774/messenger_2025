@@ -8,11 +8,54 @@
 
 .SideBarContainer {
     height: 100vh;
-    width: 25rem;
+    width: 20rem;
     background-color: #f0f0f0;
     padding: 1rem;
+
 }
 
 .userProfile{
     display: flex;
+    border-radius: 1rem;
+    border: 2px solid transparent;
+    transition: all 0.55s linear;
+    &:hover{
+            border: 2px solid gray;;
+    }
+}
+
+.userName{
+    font-size: xx-large;
+    padding: 0.2rem;
+    padding-left: 0.5rem;
+
+    p{
+        color: #333;
+    }
+
+   
+}
+
+.imageOverLay{
+    padding: 0.2rem;
+    overflow: hidden;
+    border-radius: 50%;
+}
+.userImage{
+    border-radius: 50%;
+    transition: all 0.55s linear;
+
+    &:hover{
+        transform: scale(1.1);
+    }
+}
+
+.chatList{
+    display: flex;
+    align-items: center;     
+    height: 70vh;
+    p{
+        color: #333;
+    }
+
 }

@@ -1,0 +1,200 @@
+.messageContainer {
+  position: relative;
+  margin: 12px 0;
+  max-width: 70%;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.ownMessage {
+  align-self: flex-end;
+  margin-left: auto;
+}
+
+.otherMessage {
+  align-self: flex-start;
+  margin-right: auto;
+}
+
+.messageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.sender {
+  font-weight: 600;
+  color: #333;
+}
+
+.timestamp {
+  color: #999;
+  font-size: 0.75rem;
+}
+
+.messageContent {
+  background: #f0f0f0;
+  padding: 12px 16px;
+  border-radius: 18px;
+  border-top-left-radius: 4px;
+  word-wrap: break-word;
+  line-height: 1.4;
+  color: #333;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.ownMessage .messageContent {
+  background: #0084ff;
+  color: white;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 4px;
+}
+
+.otherMessage .messageContent {
+  background: #e9ecef;
+  color: #333;
+}
+
+.messageContent:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.actionButtons {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.ownMessage .actionButtons {
+  left: -80px;
+}
+
+.otherMessage .actionButtons {
+  right: -80px;
+}
+
+.messageContainer:hover .actionButtons {
+  opacity: 1;
+}
+
+.actionButton {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.actionButton:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.editButton:hover {
+  background: #e3f2fd;
+  border-color: #2196f3;
+}
+
+.deleteButton:hover {
+  background: #ffebee;
+  border-color: #f44336;
+}
+
+.saveButton:hover {
+  background: #e8f5e8;
+  border-color: #4caf50;
+}
+
+.cancelButton:hover {
+  background: #f5f5f5;
+  border-color: #9e9e9e;
+}
+
+.editContainer {
+  background: white;
+  border: 2px solid #0084ff;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.editTextarea {
+  width: 100%;
+  min-height: 60px;
+  border: none;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 1.4;
+  padding: 8px;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.editTextarea:focus {
+  background: white;
+  box-shadow: 0 0 0 2px rgba(0, 132, 255, 0.2);
+}
+
+.editActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  justify-content: flex-end;
+}
+
+.editActions .actionButton {
+  width: auto;
+  height: auto;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .messageContainer {
+    max-width: 85%;
+  }
+  
+  .actionButtons {
+    position: static;
+    opacity: 1;
+    margin-top: 8px;
+    justify-content: center;
+    transform: none;
+  }
+  
+  .ownMessage .actionButtons,
+  .otherMessage .actionButtons {
+    left: auto;
+    right: auto;
+  }
+}

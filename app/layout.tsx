@@ -31,7 +31,7 @@ export default function RootLayout({
     <html lang="en">
       <GlobalProvider> 
       <body
-        className=" flex gap-10 h-full min-h-screen transition-all duration-300 ease-in-out"
+        className=" flex h-full min-h-screen transition-all duration-300 ease-in-out"
       >
         <SideBar />
         {children}
