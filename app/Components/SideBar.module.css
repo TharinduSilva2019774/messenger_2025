@@ -31,9 +31,7 @@
 
     p{
         color: #333;
-    }
-
-   
+    }   
 }
 
 .imageOverLay{
@@ -58,4 +56,41 @@
         color: #333;
     }
 
+}
+
+.chatButton{
+    width: 100vw;
+    margin-left: -1rem;
+    margin-right: -1rem;
+    text-align: center;
+    background-color: #f0f0f0;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.55s linear;
+
+    &:hover{
+        background-color: blanchedalmond;
+    }
+    
+    
+}
+
+.chatButtonActive{
+    width: 100vw;
+    margin-left: -1rem;
+    margin-right: -1rem;
+    text-align: center;
+    background-color: #d6cdcd;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.55s linear;
+    border-right: 5px solid black;
+
+    &:hover{
+        background-color: rgb(253, 167, 6);
+    }
 }

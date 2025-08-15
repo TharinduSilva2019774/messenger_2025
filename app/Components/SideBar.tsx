@@ -4,6 +4,7 @@ import styles from "./SideBar.module.css";
 import { useUser } from '@clerk/nextjs';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 function SideBar() {
 
@@ -14,6 +15,8 @@ function SideBar() {
         lastName: "",
         imageUrl: "",
       };
+
+    const pathname = usePathname();
     return (
         <div className={styles.SideBarContainer}>
             <div className={styles.userProfile}>
@@ -26,10 +29,11 @@ function SideBar() {
                 </div>
             </div>
             <div className={styles.chatList}>
-                <Link href="/directChat">
-                    <p>Hasal Chat</p>
-                </Link>
-
+                <div className={pathname == "/directChat"? styles.chatButtonActive : styles.chatButton}>
+                    <Link href="/directChat" >
+                        <p>Hasal Chat</p>
+                    </Link>
+                </div>
             </div>
         </div>
     )
