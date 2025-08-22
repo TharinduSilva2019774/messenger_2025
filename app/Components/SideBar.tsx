@@ -10,6 +10,11 @@ function SideBar() {
 
     const {user}= useUser();
 
+    if(user){
+        console.log(user)
+
+    }
+
     const { firstName, lastName, imageUrl } = user || {
         firstName: "",
         lastName: "",

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import styles from './page.module.css';
 import ChatMessage, { SampleMessage, sampleMessages } from '../Components/ChatMessage';
+import { getAllMessages } from '../lib/api';
 
 export default function page() {
   const [messages, setMessages] = useState<SampleMessage[]>(sampleMessages);
@@ -22,7 +23,9 @@ export default function page() {
     );
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
+    const test = await getAllMessages();
+    console.log(test.messageResponses)
     if (newMessage.trim()) {
       const newMsg: SampleMessage = {
         id: `msg_${Date.now()}`,
