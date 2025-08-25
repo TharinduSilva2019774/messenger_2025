@@ -12,7 +12,6 @@ function SideBar() {
 
     if(user){
         console.log(user)
-
     }
 
     const { firstName, lastName, imageUrl } = user || {

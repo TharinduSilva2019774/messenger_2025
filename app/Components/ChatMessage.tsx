@@ -99,7 +99,7 @@ function ChatMessage({
       onMouseLeave={() => setShowActions(false)}
     >
       <div className={styles.messageHeader}>
-        <span className={styles.sender}>{sender}</span>
+        <span className={styles.sender}>{isOwnMessage ? "You" : sender}</span>
         <span className={styles.timestamp}>{timestamp}</span>
       </div>
       

@@ -1,3 +1,5 @@
+import { ApiMessageDto, toUiMessage } from "./mapper";
+
 const API_BASE_URL = 'http://localhost:8080/';
 
 
@@ -9,4 +11,4 @@ export async function request(path:String, init?:RequestInit){
 }
 
 
-export const getAllMessages = () => request("messages",{method: 'GET'});
+export const getAllMessages = async (clarkId:String) => await request(`messages?id=${clarkId}`, { method: 'GET' });

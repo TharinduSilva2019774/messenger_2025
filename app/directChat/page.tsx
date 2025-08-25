@@ -1,13 +1,16 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './page.module.css';
 import ChatMessage, { SampleMessage, sampleMessages } from '../Components/ChatMessage';
 import { getAllMessages } from '../lib/api';
+import { toUiMessage } from '../lib/mapper';
+import { useUser } from '@clerk/nextjs';
 
 export default function page() {
   const [messages, setMessages] = useState<SampleMessage[]>(sampleMessages);
   const [newMessage, setNewMessage] = useState('');
+  const {user}= useUser();
 
   const handleDelete = (messageId: string) => {
     setMessages(prev => prev.filter(msg => msg.id !== messageId));
@@ -23,9 +26,9 @@ export default function page() {
     );
   };
 
+
   const handleSendMessage = async () => {
-    const test = await getAllMessages();
-    console.log(test.messageResponses)
+   
     if (newMessage.trim()) {
       const newMsg: SampleMessage = {
         id: `msg_${Date.now()}`,
@@ -38,6 +41,22 @@ export default function page() {
       setNewMessage('');
     }
   };
+
+  
+
+
+  const getAllUIMessages = async () => {
+    if(user){
+      const apiMessages = await getAllMessages(user.id);
+      console.log(apiMessages)
+      const test = (apiMessages.messageResponses.map(toUiMessage));
+      setMessages(test)
+    }
+  }
+
+  useEffect(() => {
+    getAllUIMessages()
+  }, []);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
