@@ -3,14 +3,63 @@
 import { useEffect, useState } from 'react';
 import styles from './page.module.css';
 import ChatMessage, { SampleMessage, sampleMessages } from '../Components/ChatMessage';
-import { getAllMessages } from '../lib/api';
+import { getAllMessages, postMessage } from '../lib/api';
 import { toUiMessage } from '../lib/mapper';
 import { useUser } from '@clerk/nextjs';
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 
 export default function page() {
   const [messages, setMessages] = useState<SampleMessage[]>(sampleMessages);
   const [newMessage, setNewMessage] = useState('');
   const {user}= useUser();
+  const [client, setClient] = useState<Client | null>(null);
+
+
+  const sendMessage = (message:String,userId:String) => {
+    if (client) {
+      client.publish({
+        destination: "/app/chat.send",
+        body: JSON.stringify({ clarkId: userId, message: message }),
+      });
+    }
+  };
+
+  useEffect(() => {
+    // connect to Spring Boot WS endpoint
+    const sock = new SockJS("http://localhost:8080/ws");
+    const stompClient = new Client({
+      webSocketFactory: () => sock,
+      reconnectDelay: 5000,
+      onConnect: () => {
+        console.log("Connected to STOMP");
+
+        // subscribe to topic
+        stompClient.subscribe("/topic/messages", (msg) => {
+          const body = JSON.parse(msg.body);
+          // setMessages((prev) => [...prev, body]);
+          console.log(body)
+          const mapped = (body.messageResponses.map(toUiMessage));
+          setMessages(mapped)
+        });
+      },
+    });
+
+    stompClient.activate();
+    setClient(stompClient);
+
+    return () => {
+      stompClient.deactivate();
+    };
+  }, []);
+
+
+
+
+
+
+
+
 
   const handleDelete = (messageId: string) => {
     setMessages(prev => prev.filter(msg => msg.id !== messageId));
@@ -29,7 +78,7 @@ export default function page() {
 
   const handleSendMessage = async () => {
    
-    if (newMessage.trim()) {
+    if (user && newMessage.trim()) {
       const newMsg: SampleMessage = {
         id: `msg_${Date.now()}`,
         message: newMessage.trim(),
@@ -37,6 +86,8 @@ export default function page() {
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         isOwnMessage: true
       };
+      // postMessage(newMessage.trim(),user.id);
+      sendMessage(newMessage.trim(),user.id)
       setMessages(prev => [...prev, newMsg]);
       setNewMessage('');
     }
@@ -49,8 +100,8 @@ export default function page() {
     if(user){
       const apiMessages = await getAllMessages(user.id);
       console.log(apiMessages)
-      const test = (apiMessages.messageResponses.map(toUiMessage));
-      setMessages(test)
+      const mapped = (apiMessages.messageResponses.map(toUiMessage));
+      setMessages(mapped)
     }
   }
 
