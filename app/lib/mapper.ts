@@ -1,9 +1,11 @@
+// Utility mapper – no React hooks here
+
 export interface ApiMessageDto {
     id: string;
     message: string;
     time: string;
     userFirstName: string;
-    currentUser: boolean;
+    clarkId: string;
   }
 
 export interface UiMessageDto {
@@ -14,6 +16,13 @@ export interface UiMessageDto {
   isOwnMessage: boolean;
 }
 
+
+let currentClarkId: string | null = null;
+
+export function setCurrentClarkId(id: string | null) {
+  currentClarkId = id ?? null;
+}
+
 export function toUiMessage(api: ApiMessageDto): UiMessageDto {
   const date = new Date(api.time);
   const timestamp = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -22,6 +31,6 @@ export function toUiMessage(api: ApiMessageDto): UiMessageDto {
     message: api.message,
     sender: api.userFirstName,
     timestamp,
-    isOwnMessage: api.currentUser,
+    isOwnMessage: currentClarkId !== null ? currentClarkId === api.clarkId : false,
   };
 }

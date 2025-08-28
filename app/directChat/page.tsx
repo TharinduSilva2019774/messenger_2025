@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import styles from './page.module.css';
 import ChatMessage, { SampleMessage, sampleMessages } from '../Components/ChatMessage';
 import { getAllMessages, postMessage } from '../lib/api';
-import { toUiMessage } from '../lib/mapper';
+import { toUiMessage, setCurrentClarkId } from '../lib/mapper';
 import { useUser } from '@clerk/nextjs';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
@@ -24,6 +24,11 @@ export default function page() {
       });
     }
   };
+
+  useEffect(() => {
+    // keep mapper aware of the current user id
+    setCurrentClarkId(user?.id ?? null);
+  }, [user?.id]);
 
   useEffect(() => {
     // connect to Spring Boot WS endpoint
@@ -52,12 +57,6 @@ export default function page() {
       stompClient.deactivate();
     };
   }, []);
-
-
-
-
-
-
 
 
 
