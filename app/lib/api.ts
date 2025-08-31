@@ -1,6 +1,5 @@
-import { ApiMessageDto, toUiMessage } from "./mapper";
 
-const API_BASE_URL = 'http://localhost:8080/';
+const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER || 'http://localhost:8080/';
 
 
 export async function request(path:String, init?:RequestInit){
@@ -19,7 +18,6 @@ export async function request(path:String, init?:RequestInit){
         return await response.text();
       }
 }
-
 
 export const getAllMessages = async (clarkId:String) => await request(`messages?id=${clarkId}`, { method: 'GET' });
 

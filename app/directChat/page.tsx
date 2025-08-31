@@ -26,25 +26,32 @@ export default function page() {
   };
 
   useEffect(() => {
-    // keep mapper aware of the current user id
+    // keep mapper aware of the current user id to identify own messages
     setCurrentClarkId(user?.id ?? null);
   }, [user?.id]);
 
   useEffect(() => {
-    // connect to Spring Boot WS endpoint
-    const sock = new SockJS("http://localhost:8080/ws");
+    // Establish a connection to the Spring Boot WebSocket endpoint using SockJS
+  // Use environment variable for WebSocket server address
+  const wsServer = process.env.NEXT_PUBLIC_WS_SERVER || "http://localhost:8080/ws";
+  const sock = new SockJS(wsServer);
+    // Create a STOMP client for messaging over the WebSocket
     const stompClient = new Client({
-      webSocketFactory: () => sock,
-      reconnectDelay: 5000,
+      webSocketFactory: () => sock, // Use SockJS for WebSocket fallback support
+      reconnectDelay: 5000, // Try to reconnect every 5 seconds if disconnected
       onConnect: () => {
+        // Callback when STOMP connection is established
         console.log("Connected to STOMP");
 
-        // subscribe to topic
+        // Subscribe to the '/topic/messages' channel to receive broadcasted messages
         stompClient.subscribe("/topic/messages", (msg) => {
+          // Parse the incoming message body from JSON
           const body = JSON.parse(msg.body);
-          // setMessages((prev) => [...prev, body]);
+          // Example: log the received message payload
           console.log(body)
+          // Map the received message responses to UI message format
           const mapped = (body.messageResponses.map(toUiMessage));
+          // Update the local state with the new messages
           setMessages(mapped)
         });
       },
@@ -57,8 +64,6 @@ export default function page() {
       stompClient.deactivate();
     };
   }, []);
-
-
 
   const handleDelete = (messageId: string) => {
     setMessages(prev => prev.filter(msg => msg.id !== messageId));
@@ -73,7 +78,6 @@ export default function page() {
       )
     );
   };
-
 
   const handleSendMessage = async () => {
    
@@ -91,9 +95,6 @@ export default function page() {
       setNewMessage('');
     }
   };
-
-  
-
 
   const getAllUIMessages = async () => {
     if(user){
