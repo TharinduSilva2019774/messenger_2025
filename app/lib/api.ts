@@ -19,10 +19,10 @@ export async function request(path:String, init?:RequestInit){
       }
 }
 
-export const getAllMessages = async (clarkId:String) => await request(`messages?id=${clarkId}`, { method: 'GET' });
+export const getAllMessages = async (clarkId:String) => await request(`/messages?id=${clarkId}`, { method: 'GET' });
 
 export const postMessage = async (message: string, clarkId: string) => {
-  return await request('messages', {
+  return await request('/messages', {
     method: 'POST',
     body: JSON.stringify({ message, clarkId })
   });

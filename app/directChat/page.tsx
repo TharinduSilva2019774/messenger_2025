@@ -1,8 +1,9 @@
-"use client";
 
-import { useEffect, useState } from 'react';
+"use client";
+import { useEffect, useState, useRef } from 'react';
+
 import styles from './page.module.css';
-import ChatMessage, { SampleMessage, sampleMessages } from '../Components/ChatMessage';
+import ChatMessage, { SampleMessage } from '../Components/ChatMessage';
 import { getAllMessages, postMessage } from '../lib/api';
 import { toUiMessage, setCurrentClarkId } from '../lib/mapper';
 import { useUser } from '@clerk/nextjs';
@@ -10,7 +11,7 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
 export default function page() {
-  const [messages, setMessages] = useState<SampleMessage[]>(sampleMessages);
+  const [messages, setMessages] = useState<SampleMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const {user}= useUser();
   const [client, setClient] = useState<Client | null>(null);
@@ -116,6 +117,16 @@ export default function page() {
     }
   };
 
+  // Ref for the messages list container
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
   return (
     <div className={styles.mainContainer}>
       <div className={styles.chatContainer}>
@@ -132,6 +143,8 @@ export default function page() {
               onEdit={handleEdit}
             />
           ))}
+          {/* Dummy div for auto-scroll */}
+          <div ref={messagesEndRef} />
         </div>
       </div>
 

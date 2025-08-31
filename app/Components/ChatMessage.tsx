@@ -22,45 +22,6 @@ export interface SampleMessage {
   isOwnMessage: boolean;
 }
 
-// Sample data for testing
-export const sampleMessages: SampleMessage[] = [
-  {
-    id: "msg_1",
-    message: "Hey! How's it going?",
-    sender: "Alice",
-    timestamp: "2:30 PM",
-    isOwnMessage: false
-  },
-  {
-    id: "msg_2",
-    message: "I'm doing great! Just finished working on a new project.",
-    sender: "You",
-    timestamp: "2:32 PM",
-    isOwnMessage: true
-  },
-  {
-    id: "msg_3",
-    message: "That sounds exciting! What kind of project?",
-    sender: "Alice",
-    timestamp: "2:33 PM",
-    isOwnMessage: false
-  },
-  {
-    id: "msg_4",
-    message: "It's a messaging app with some cool features like message editing and deletion.",
-    sender: "You",
-    timestamp: "2:35 PM",
-    isOwnMessage: true
-  },
-  {
-    id: "msg_5",
-    message: "Wow, that's impressive! Can't wait to see it in action.",
-    sender: "Alice",
-    timestamp: "2:36 PM",
-    isOwnMessage: false
-  }
-];
-
 function ChatMessage({ 
   message, 
   sender, 
