@@ -1,0 +1,66 @@
+# Node.js dependencies
+node_modules/
+
+# Next.js build output
+.next/
+
+# # Local environment variables and secrets
+# .env
+# .env.*
+# *.env
+
+# Firebase local config
+.firebase*
+
+# Git and VCS
+.git/
+.gitignore
+.hg/
+.svn/
+
+# IDE/editor config
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build and output directories
+dist/
+build/
+out/
+tmp/
+temp/
+*.tmp
+
+# Test and debug artifacts
+test/
+tests/
+debug/
+*.log
+
+# Documentation and markdown
+/docs/
+*.md
+README*
+
+# Temporary and cache files
+.clerk/.tmp/
+
+# Miscellaneous
+*.pem
+*.key
+*.crt
+config.local.*
+*.local.yml
+
+# Ignore Docker-related files (if not needed in build context)
+Dockerfile*
+docker-compose*
+
+# Ignore image assets (if not needed in build context)
+# Uncomment if /img is not needed in the container
+# img/
+
+# Ignore public assets (if not needed in build context)
+# Uncomment if /public is not needed in the container
+# public/

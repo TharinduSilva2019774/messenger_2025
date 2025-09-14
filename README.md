@@ -1,135 +1,47 @@
-
-# Messenger 2025 🚀
-
-A modern, full-stack real-time messenger app built with Next.js, React, Clerk authentication, Tailwind CSS, and WebSocket (STOMP/SockJS).
-
 ---
 
-## Features
+## Running with Docker 🐳
 
-- 🔒 Secure authentication with Clerk
-- 💬 Real-time chat powered by WebSocket (STOMP/SockJS)
-- 🎨 Beautiful, responsive UI with Tailwind CSS
-- 🧩 Modular React components
-- ⚡ Fast and scalable Next.js 15 frontend
-- 🗂️ Clean code structure and easy extensibility
+You can run Messenger 2025 locally using Docker and Docker Compose for a fully containerized setup.
 
----
+### Requirements
+- **Docker** and **Docker Compose** installed
+- Node.js version is set via Dockerfile (`NODE_VERSION=22.13.1`)
+- MySQL service runs with default credentials (change for production!)
 
-## Demo
+### Environment Variables
+- The app expects environment variables for Clerk and backend URLs. You can use a `.env` or `.env.local` file in the project root, or set them via Docker Compose:
+  ```env
+  NEXT_PUBLIC_WS_SERVER=http://localhost:8080/ws
+  NEXT_PUBLIC_SERVER=http://localhost:8080/
+  CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+  ```
+- For MySQL, the following are set in `docker-compose.yml`:
+  - `MYSQL_ROOT_PASSWORD=example`
+  - `MYSQL_DATABASE=messenger`
+  - `MYSQL_USER=messenger`
+  - `MYSQL_PASSWORD=messengerpass`
 
-![Messenger Demo](../img/profile.png)
+### Build & Run
 
----
+1. **Build and start all services:**
+   ```bash
+   docker compose up --build
+   ```
+   This will build the Next.js app and start both the frontend and MySQL database.
 
-## Tech Stack
+2. **Access the app:**
+   - Frontend: [http://localhost:3000](http://localhost:3000)
+   - MySQL: localhost:3306
 
-- **Frontend:** Next.js 15, React 19, Clerk, Tailwind CSS, STOMP/SockJS
-- **Backend:** Spring Boot 3.5, MySQL, JPA, Lombok, STOMP/WebSocket *(see backend repo)*
+### Ports
+- **ts-app (Next.js):** `3000` (exposed as `3000:3000`)
+- **mysql-db:** `3306` (exposed as `3306:3306`)
 
----
-
-## Getting Started
-
-### Prerequisites
-- Node.js 20+
-- Clerk account (for authentication)
-
-### Installation
-
-```bash
-# Install dependencies
-npm install
-
-# Start the development server
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
----
-
-## Environment Variables
-
-Create a `.env.local` file in the project root:
-
-```
-NEXT_PUBLIC_WS_SERVER=http://localhost:8080/ws
-NEXT_PUBLIC_SERVER=http://localhost:8080/
-CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-```
+### Notes
+- The app runs as a non-root user inside the container for security.
+- Persistent MySQL data is stored in the `mysql-data` Docker volume.
+- The `ts-app` service depends on `mysql-db` and will wait for it to be healthy before starting.
+- If you need to customize environment variables, uncomment the `env_file` line in `docker-compose.yml` and provide your own `.env` file.
 
 ---
-
-## Project Structure
-
-```
-app/
-	Components/         # Reusable React components
-	Providers/          # Context and global providers
-	directChat/         # Main chat page
-	lib/                # API and utility functions
-	signIn/             # Sign-in page
-	globals.css         # Global styles
-	layout.tsx          # App layout
-	page.tsx            # Home page
-public/               # Static assets
-img/                  # Images
-```
-
----
-
-## Key Components
-
-- **ChatMessage**: Displays a single chat message
-- **SideBar**: Shows user list or navigation
-- **ChatWindow**: Main chat interface
-- **ContextProvidor**: Provides global state (WebSocket, user)
-
----
-
-## Real-Time Messaging
-
-- Connects to backend WebSocket using STOMP/SockJS
-- Subscribes to `/topic/messages` for live updates
-- Publishes messages to `/app/chat.send`
-
----
-
-## Authentication
-
-- Clerk handles sign-up/sign-in and user management
-- JWT tokens passed to backend for protected endpoints
-
----
-
-## Contributing
-
-1. Fork the repo
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## License
-
-This project is licensed under the MIT License.
-
----
-
-## Acknowledgements
-
-- [Next.js](https://nextjs.org/)
-- [Clerk](https://clerk.com/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Spring Boot](https://spring.io/projects/spring-boot)
-- [SockJS](https://github.com/sockjs/sockjs-client)
-- [STOMP.js](https://stomp-js.github.io/)
-
----
-
-## Contact
-
-Created by [Tharindu Silva](https://github.com/TharinduSilva2019774) — feel free to reach out!

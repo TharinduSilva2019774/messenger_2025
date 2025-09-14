@@ -1,0 +1,45 @@
+services:
+  ts-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ts-app:latest
+    container_name: ts-app
+    restart: unless-stopped
+    init: true
+    ports:
+      - "3000:3000" # Next.js default port
+    # env_file: ./.env  # Uncomment if .env file exists
+    networks:
+      - appnet
+    depends_on:
+      - mysql-db
+
+  mysql-db:
+    image: mysql:latest
+    container_name: mysql-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: example # Change this in production
+      MYSQL_DATABASE: messenger
+      MYSQL_USER: messenger
+      MYSQL_PASSWORD: messengerpass
+    ports:
+      - "3306:3306" # MySQL default port
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - appnet
+
+networks:
+  appnet:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    # Persistent storage for MySQL
