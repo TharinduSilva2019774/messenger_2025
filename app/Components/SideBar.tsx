@@ -35,7 +35,7 @@ function SideBar() {
             <div className={styles.chatList}>
                 <div className={pathname == "/directChat"? styles.chatButtonActive : styles.chatButton}>
                     <Link href="/directChat" >
-                        <p>Hasal Chat</p>
+                        <p>Chat 1</p>
                     </Link>
                 </div>
             </div>
