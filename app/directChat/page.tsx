@@ -64,6 +64,8 @@ export default function page() {
     return () => {
       stompClient.deactivate();
     };
+
+    
   }, []);
 
   const handleDelete = (messageId: string) => {
@@ -106,9 +108,11 @@ export default function page() {
     }
   }
 
-  useEffect(() => {
-    getAllUIMessages()
-  }, []);
+useEffect(() => {
+  if (user?.id) {
+    getAllUIMessages();
+  }
+}, [user?.id]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
