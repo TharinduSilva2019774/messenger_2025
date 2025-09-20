@@ -1,8 +1,9 @@
 .messageContainer {
   position: relative;
-  margin: 12px 0;
+  margin: 5px 0;
   max-width: 70%;
   animation: fadeIn 0.3s ease-in;
+  word-break: break-word;
 }
 
 .ownMessage {
