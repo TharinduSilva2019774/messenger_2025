@@ -27,3 +27,5 @@ export const postMessage = async (message: string, clarkId: string) => {
     body: JSON.stringify({ message, clarkId })
   });
 };
+
+export const getAllChats = async (clarkId:String) => await request(`/chat?id=${clarkId}`, { method: 'GET' });

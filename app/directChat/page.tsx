@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 
 import styles from './page.module.css';
-import ChatMessage, { SampleMessage } from '../Components/ChatMessage';
+import ChatMessage, { MessageModel } from '../Components/ChatMessage';
 import { getAllMessages, postMessage } from '../lib/api';
 import { toUiMessage, setCurrentClarkId } from '../lib/mapper';
 import { useUser } from '@clerk/nextjs';
@@ -11,7 +11,7 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
 export default function page() {
-  const [messages, setMessages] = useState<SampleMessage[]>([]);
+  const [messages, setMessages] = useState<MessageModel[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const {user}= useUser();
   const [client, setClient] = useState<Client | null>(null);
@@ -85,7 +85,7 @@ export default function page() {
   const handleSendMessage = async () => {
    
     if (user && newMessage.trim()) {
-      const newMsg: SampleMessage = {
+      const newMsg: MessageModel = {
         id: `msg_${Date.now()}`,
         message: newMessage.trim(),
         sender: 'You',

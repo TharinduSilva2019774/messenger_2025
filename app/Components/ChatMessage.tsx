@@ -14,7 +14,7 @@ interface ChatMessageProps {
 }
 
 // Sample data interface for testing
-export interface SampleMessage {
+export interface MessageModel {
   id: string;
   message: string;
   sender: string;
