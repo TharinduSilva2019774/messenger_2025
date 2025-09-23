@@ -6,6 +6,7 @@ export interface ApiMessageDto {
   time: string;
   userFirstName: string;
   clarkId: string;
+  chatId: string;
 }
 
 export interface UiMessageDto {
@@ -14,6 +15,7 @@ export interface UiMessageDto {
   sender: string;
   timestamp: string;
   isOwnMessage: boolean;
+  chatId: string;
 }
 
 export interface ChatDto {
@@ -40,5 +42,6 @@ export function toUiMessage(api: ApiMessageDto): UiMessageDto {
     timestamp,
     isOwnMessage:
       currentClarkId !== null ? currentClarkId === api.clarkId : false,
+    chatId: api.chatId,
   };
 }

@@ -19,8 +19,10 @@ export async function request(path: String, init?: RequestInit) {
   }
 }
 
-export const getAllMessages = async (clarkId: String) =>
-  await request(`/messages?id=${clarkId}`, { method: "GET" });
+export const getAllMessages = async (clarkId: String, chatId: String) =>
+  await request(`/messages?userId=${clarkId}&chatId=${chatId}`, {
+    method: "GET",
+  });
 
 export const postMessage = async (message: string, clarkId: string) => {
   return await request("/messages", {

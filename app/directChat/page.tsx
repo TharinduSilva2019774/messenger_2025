@@ -8,18 +8,25 @@ import { toUiMessage, setCurrentClarkId } from "../lib/mapper";
 import { useUser } from "@clerk/nextjs";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { useSearchParams } from "next/navigation";
 
 export default function page() {
   const [messages, setMessages] = useState<MessageModel[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const { user } = useUser();
   const [client, setClient] = useState<Client | null>(null);
+  const searchParams = useSearchParams();
+  const chatId = searchParams.get("id");
 
-  const sendMessage = (message: String, userId: String) => {
+  const sendMessage = (message: String, userId: String, chatId: String) => {
     if (client) {
       client.publish({
         destination: "/app/chat.send",
-        body: JSON.stringify({ clarkId: userId, message: message }),
+        body: JSON.stringify({
+          clarkId: userId,
+          message: message,
+          chatId: chatId,
+        }),
       });
     }
   };
@@ -90,7 +97,7 @@ export default function page() {
         isOwnMessage: true,
       };
       // postMessage(newMessage.trim(),user.id);
-      sendMessage(newMessage.trim(), user.id);
+      sendMessage(newMessage.trim(), user.id, chatId ?? "");
       setMessages((prev) => [...prev, newMsg]);
       setNewMessage("");
     }
@@ -98,7 +105,7 @@ export default function page() {
 
   const getAllUIMessages = async () => {
     if (user) {
-      const apiMessages = await getAllMessages(user.id);
+      const apiMessages = await getAllMessages(user.id, chatId ?? "");
       console.log(apiMessages);
       const mapped = apiMessages.messageResponses.map(toUiMessage);
       setMessages(mapped);
@@ -109,7 +116,7 @@ export default function page() {
     if (user?.id) {
       getAllUIMessages();
     }
-  }, [user?.id]);
+  }, [chatId, user?.id]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
