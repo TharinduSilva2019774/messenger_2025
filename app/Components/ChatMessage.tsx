@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from 'react';
-import styles from './ChatMessage.module.css';
+import { useState } from "react";
+import styles from "./ChatMessage.module.css";
 
 interface ChatMessageProps {
   message: string;
@@ -22,14 +22,14 @@ export interface MessageModel {
   isOwnMessage: boolean;
 }
 
-function ChatMessage({ 
-  message, 
-  sender, 
-  timestamp, 
-  isOwnMessage = false, 
-  onDelete, 
-  onEdit, 
-  messageId 
+function ChatMessage({
+  message,
+  sender,
+  timestamp,
+  isOwnMessage = false,
+  onDelete,
+  onEdit,
+  messageId,
 }: ChatMessageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editMessage, setEditMessage] = useState(message);
@@ -54,8 +54,10 @@ function ChatMessage({
   };
 
   return (
-    <div 
-      className={`${styles.messageContainer} ${isOwnMessage ? styles.ownMessage : styles.otherMessage}`}
+    <div
+      className={`${styles.messageContainer} ${
+        isOwnMessage ? styles.ownMessage : styles.otherMessage
+      }`}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
     >
@@ -63,22 +65,19 @@ function ChatMessage({
         <span className={styles.sender}>{isOwnMessage ? "You" : sender}</span>
         <span className={styles.timestamp}>{timestamp}</span>
       </div>
-      
-    
-        <div className={styles.messageContent}>
-          {message}
-        </div>
+
+      <div className={styles.messageContent}>{message}</div>
 
       {showActions && (
         <div className={styles.actionButtons}>
-          <button 
+          <button
             // onClick={() => setIsEditing(true)}
             className={`${styles.actionButton} ${styles.editButton}`}
             title="Edit message"
           >
             ✏️
           </button>
-          <button 
+          <button
             // onClick={handleDelete}
             className={`${styles.actionButton} ${styles.deleteButton}`}
             title="Delete message"

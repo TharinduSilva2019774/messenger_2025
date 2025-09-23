@@ -1,23 +1,21 @@
-
 "use client";
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from "react";
 
-import styles from './page.module.css';
-import ChatMessage, { MessageModel } from '../Components/ChatMessage';
-import { getAllMessages, postMessage } from '../lib/api';
-import { toUiMessage, setCurrentClarkId } from '../lib/mapper';
-import { useUser } from '@clerk/nextjs';
-import { Client } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
+import styles from "./page.module.css";
+import ChatMessage, { MessageModel } from "../Components/ChatMessage";
+import { getAllMessages, postMessage } from "../lib/api";
+import { toUiMessage, setCurrentClarkId } from "../lib/mapper";
+import { useUser } from "@clerk/nextjs";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 export default function page() {
   const [messages, setMessages] = useState<MessageModel[]>([]);
-  const [newMessage, setNewMessage] = useState('');
-  const {user}= useUser();
+  const [newMessage, setNewMessage] = useState("");
+  const { user } = useUser();
   const [client, setClient] = useState<Client | null>(null);
 
-
-  const sendMessage = (message:String,userId:String) => {
+  const sendMessage = (message: String, userId: String) => {
     if (client) {
       client.publish({
         destination: "/app/chat.send",
@@ -33,9 +31,10 @@ export default function page() {
 
   useEffect(() => {
     // Establish a connection to the Spring Boot WebSocket endpoint using SockJS
-  // Use environment variable for WebSocket server address
-  const wsServer = process.env.NEXT_PUBLIC_WS_SERVER || "http://localhost:8080/ws";
-  const sock = new SockJS(wsServer);
+    // Use environment variable for WebSocket server address
+    const wsServer =
+      process.env.NEXT_PUBLIC_WS_SERVER || "http://localhost:8080/ws";
+    const sock = new SockJS(wsServer);
     // Create a STOMP client for messaging over the WebSocket
     const stompClient = new Client({
       webSocketFactory: () => sock, // Use SockJS for WebSocket fallback support
@@ -49,11 +48,11 @@ export default function page() {
           // Parse the incoming message body from JSON
           const body = JSON.parse(msg.body);
           // Example: log the received message payload
-          console.log(body)
+          console.log(body);
           // Map the received message responses to UI message format
-          const mapped = (body.messageResponses.map(toUiMessage));
+          const mapped = body.messageResponses.map(toUiMessage);
           // Update the local state with the new messages
-          setMessages(mapped)
+          setMessages(mapped);
         });
       },
     });
@@ -64,58 +63,56 @@ export default function page() {
     return () => {
       stompClient.deactivate();
     };
-
-    
   }, []);
 
   const handleDelete = (messageId: string) => {
-    setMessages(prev => prev.filter(msg => msg.id !== messageId));
+    setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
   };
 
   const handleEdit = (messageId: string, newMessageText: string) => {
-    setMessages(prev => 
-      prev.map(msg => 
-        msg.id === messageId 
-          ? { ...msg, message: newMessageText }
-          : msg
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === messageId ? { ...msg, message: newMessageText } : msg
       )
     );
   };
 
   const handleSendMessage = async () => {
-   
     if (user && newMessage.trim()) {
       const newMsg: MessageModel = {
         id: `msg_${Date.now()}`,
         message: newMessage.trim(),
-        sender: 'You',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isOwnMessage: true
+        sender: "You",
+        timestamp: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        isOwnMessage: true,
       };
       // postMessage(newMessage.trim(),user.id);
-      sendMessage(newMessage.trim(),user.id)
-      setMessages(prev => [...prev, newMsg]);
-      setNewMessage('');
+      sendMessage(newMessage.trim(), user.id);
+      setMessages((prev) => [...prev, newMsg]);
+      setNewMessage("");
     }
   };
 
   const getAllUIMessages = async () => {
-    if(user){
+    if (user) {
       const apiMessages = await getAllMessages(user.id);
-      console.log(apiMessages)
-      const mapped = (apiMessages.messageResponses.map(toUiMessage));
-      setMessages(mapped)
+      console.log(apiMessages);
+      const mapped = apiMessages.messageResponses.map(toUiMessage);
+      setMessages(mapped);
     }
-  }
+  };
 
-useEffect(() => {
-  if (user?.id) {
-    getAllUIMessages();
-  }
-}, [user?.id]);
+  useEffect(() => {
+    if (user?.id) {
+      getAllUIMessages();
+    }
+  }, [user?.id]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
@@ -161,7 +158,7 @@ useEffect(() => {
           className={styles.messageInput}
           rows={3}
         />
-        <button 
+        <button
           onClick={handleSendMessage}
           disabled={!newMessage.trim()}
           className={styles.sendButton}
