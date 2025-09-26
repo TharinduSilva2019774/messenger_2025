@@ -1,21 +1,27 @@
 // Utility mapper – no React hooks here
 
 export interface ApiMessageDto {
-    id: string;
-    message: string;
-    time: string;
-    userFirstName: string;
-    clarkId: string;
-  }
+  id: string;
+  message: string;
+  time: string;
+  userFirstName: string;
+  clarkId: string;
+  chatId: string;
+}
 
 export interface UiMessageDto {
   id: string;
   message: string;
   sender: string;
-  timestamp: string; 
+  timestamp: string;
   isOwnMessage: boolean;
+  chatId: string;
 }
 
+export interface ChatDto {
+  id: string;
+  name: string;
+}
 
 let currentClarkId: string | null = null;
 
@@ -25,12 +31,17 @@ export function setCurrentClarkId(id: string | null) {
 
 export function toUiMessage(api: ApiMessageDto): UiMessageDto {
   const date = new Date(api.time);
-  const timestamp = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const timestamp = date.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
   return {
     id: api.id,
     message: api.message,
     sender: api.userFirstName,
     timestamp,
-    isOwnMessage: currentClarkId !== null ? currentClarkId === api.clarkId : false,
+    isOwnMessage:
+      currentClarkId !== null ? currentClarkId === api.clarkId : false,
+    chatId: api.chatId,
   };
 }
