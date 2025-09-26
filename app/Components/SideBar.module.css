@@ -49,7 +49,9 @@
 
 .chatList {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   height: 70vh;
   p {
     color: #333;
@@ -57,7 +59,7 @@
 }
 
 .chatButton {
-  width: 100vw;
+  width: 100%;
   margin-left: -1rem;
   margin-right: -1rem;
   text-align: center;
@@ -74,7 +76,7 @@
 }
 
 .chatButtonActive {
-  width: 100vw;
+  width: 100%;
   margin-left: -1rem;
   margin-right: -1rem;
   text-align: center;

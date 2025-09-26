@@ -55,9 +55,8 @@ function SideBar() {
           <p>{lastName}</p>
         </div>
       </div>
-
-      {chats.map((chat) => (
-        <div className={styles.chatList} key={chat.id}>
+      <div className={styles.chatList}>
+        {chats.map((chat) => (
           <div
             className={
               pathname == "/directChat"
@@ -69,8 +68,8 @@ function SideBar() {
               <p>{chat.name}</p>
             </Link>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
