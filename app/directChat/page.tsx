@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 
 import styles from "./page.module.css";
 import ChatMessage, { MessageModel } from "../Components/ChatMessage";
@@ -10,7 +10,7 @@ import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useSearchParams } from "next/navigation";
 
-export default function page() {
+function DirectChatPage() {
   const [messages, setMessages] = useState<MessageModel[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const { user } = useUser();
@@ -174,5 +174,13 @@ export default function page() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading chat...</div>}>
+      <DirectChatPage />
+    </Suspense>
   );
 }
