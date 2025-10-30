@@ -5,6 +5,7 @@ import { GlobalProvider } from "./Providers/globalProvidor";
 import SideBar from "./Components/SideBar";
 import ContextProvidor from "./Providers/ContextProvidor";
 import { ClerkProvider } from "@clerk/nextjs";
+import AppInitializer from "./Initializer/AppInitializer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,16 +29,16 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-    <html lang="en">
-      <GlobalProvider> 
-      <body
-        className=" flex h-full min-h-screen transition-all duration-300 ease-in-out"
-      >
-        <SideBar />
-        {children}
-      </body>
-      </GlobalProvider>
-    </html>
+      <html lang="en">
+        <AppInitializer>
+          <GlobalProvider>
+            <body className=" flex h-full min-h-screen transition-all duration-300 ease-in-out">
+              <SideBar />
+              {children}
+            </body>
+          </GlobalProvider>
+        </AppInitializer>
+      </html>
     </ClerkProvider>
   );
 }

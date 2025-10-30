@@ -58,14 +58,18 @@ function SideBar() {
       <div className={styles.chatList}>
         {chats.map((chat) => (
           <div
+            key={chat.id}
             className={
-              pathname == "/directChat"
+              pathname === `/directChat?id=${chat.id}`
                 ? styles.chatButtonActive
                 : styles.chatButton
             }
           >
-            <Link href={`/directChat?id=${chat.id}`}>
-              <p>{chat.name}</p>
+            <Link href={`/directChat?id=${chat.id}`} className={styles.chatLink}>
+              <div className={styles.chatInfo}>
+                <p className={styles.chatName}>{chat.name}</p>
+                <p className={styles.lastMessage}>Click to view chat</p>
+              </div>
             </Link>
           </div>
         ))}
