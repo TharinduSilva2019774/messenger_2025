@@ -68,7 +68,6 @@ function SideBar() {
             <Link href={`/directChat?id=${chat.id}`} className={styles.chatLink}>
               <div className={styles.chatInfo}>
                 <p className={styles.chatName}>{chat.name}</p>
-                <p className={styles.lastMessage}>Click to view chat</p>
               </div>
             </Link>
           </div>
