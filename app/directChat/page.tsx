@@ -30,7 +30,12 @@ function DirectChatPage() {
       });
     }
   };
-
+  const playSound = () => {
+    const audio = new Audio("Oii.mp3");
+    audio.play().catch(() => {
+      console.warn("User interaction required before playing sound");
+    });
+  };
   useEffect(() => {
     // keep mapper aware of the current user id to identify own messages
     setCurrentClarkId(user?.id ?? null);
@@ -58,6 +63,10 @@ function DirectChatPage() {
           console.log(body);
           // Map the received message responses to UI message format
           const mapped = body.messageResponses.map(toUiMessage);
+          const last = mapped.at(-1); // or use mapped[mapped.length-1]
+          if (last.isOwnMessage === false) {
+            playSound();
+          }
           // Update the local state with the new messages
           setMessages(mapped);
         });
