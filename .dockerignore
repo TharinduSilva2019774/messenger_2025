@@ -5,7 +5,7 @@ node_modules/
 .next/
 
 # # Local environment variables and secrets
-# .env
+.env.local
 # .env.*
 # *.env
 

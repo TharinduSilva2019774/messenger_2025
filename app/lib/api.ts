@@ -33,3 +33,14 @@ export const postMessage = async (message: string, clarkId: string) => {
 
 export const getAllChats = async (clarkId: String) =>
   await request(`/chat?id=${clarkId}`, { method: "GET" });
+
+export const postUser = async (
+  firstName: string,
+  lastName: string,
+  clarkId: string
+) => {
+  return await request("/user", {
+    method: "POST",
+    body: JSON.stringify({ firstName, lastName, clarkId }),
+  });
+};
