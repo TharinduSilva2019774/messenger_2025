@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER || "http://localhost:8080/";
+const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER || "http://localhost:8080";
 
 export async function request(path: String, init?: RequestInit) {
   const response = await fetch(`${API_BASE_URL}${path}`, {

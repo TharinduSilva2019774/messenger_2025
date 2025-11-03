@@ -6,6 +6,7 @@ import SideBar from "./Components/SideBar";
 import ContextProvidor from "./Providers/ContextProvidor";
 import { ClerkProvider } from "@clerk/nextjs";
 import AppInitializer from "./Initializer/AppInitializer";
+import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +34,9 @@ export default function RootLayout({
         <AppInitializer>
           <GlobalProvider>
             <body className=" flex h-full min-h-screen transition-all duration-300 ease-in-out">
-              <SideBar />
+              <Suspense fallback={<div className="w-64 bg-gray-100">Loading...</div>}>
+                <SideBar />
+              </Suspense>
               {children}
             </body>
           </GlobalProvider>
