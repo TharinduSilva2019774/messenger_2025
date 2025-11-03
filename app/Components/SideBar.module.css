@@ -76,7 +76,7 @@
 }
 
 .chatButtonActive {
-  width: 100%;
+  width: 110%;
   margin-left: -1rem;
   margin-right: -1rem;
   text-align: center;
@@ -87,6 +87,7 @@
   justify-content: center;
   transition: all 0.55s linear;
   border-right: 5px solid black;
+  border-radius: 0 8px 8px 0;
 
   &:hover {
     background-color: rgb(253, 167, 6);

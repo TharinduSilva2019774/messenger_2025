@@ -169,7 +169,7 @@ function DirectChatPage() {
         <textarea
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyPress}
           placeholder="Type a new message..."
           className={styles.messageInput}
           rows={3}

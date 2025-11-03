@@ -6,7 +6,7 @@
 .chatContainer {
   background: #f8f9fa;
   padding: 20px;
-  height: 75vh;
+  height: 80vh;
   overflow-y: auto;
 }
 
@@ -20,11 +20,15 @@
   background: white;
   padding: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  height: 25vh;
+  height: 20vh;
+  display: flex;
+  /* flex-direction: column; */
+  align-items: center;  
 }
 
 .messageInput {
-  width: 100%;
+  color: #333;
+  width: 90%;
   border: 2px solid #e9ecef;
   border-radius: 12px;
   padding: 5px;
@@ -32,17 +36,18 @@
   font-family: inherit;
   resize: vertical;
   max-height: 80px;
-  margin-bottom: 16px;
   transition: border-color 0.2s ease;
 }
 
 .messageInput:focus {
+  color: #333;
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .sendButton {
+  width: 10%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
@@ -53,6 +58,8 @@
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  max-height: 80px;
+  height: 80px;
 }
 
 .sendButton:hover:not(:disabled) {

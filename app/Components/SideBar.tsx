@@ -1,10 +1,9 @@
 "use client";
-import { auth, currentUser } from "@clerk/nextjs/server";
 import styles from "./SideBar.module.css";
 import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getAllChats } from "../lib/api";
 import { ChatDto } from "../lib/mapper";
@@ -35,7 +34,8 @@ function SideBar() {
     fetchChats();
   }, [user]);
 
-  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const selectedChatId = searchParams?.get("id");
   return (
     <div className={styles.SideBarContainer}>
       <div className={styles.userProfile}>
@@ -60,7 +60,8 @@ function SideBar() {
           <div
             key={chat.id}
             className={
-              pathname === `/directChat?id=${chat.id}`
+              // compare the id query param to the chat id to determine active state
+              String(selectedChatId) === String(chat.id)
                 ? styles.chatButtonActive
                 : styles.chatButton
             }
