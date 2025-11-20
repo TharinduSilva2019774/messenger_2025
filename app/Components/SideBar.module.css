@@ -1,5 +1,5 @@
 .h1 {
-  color: #333;
+  color: #ffffff;
   font-size: 1.5rem;
   font-weight: 600;
   margin: 0;
@@ -9,8 +9,8 @@
 .SideBarContainer {
   height: 100vh;
   width: 20rem;
-  background-color: #f0f0f0;
-  padding: 1rem;
+  background-color: #1a2233;
+  padding: 0.3rem;
 }
 
 .userProfile {
@@ -18,25 +18,34 @@
   border-radius: 1rem;
   border: 2px solid transparent;
   transition: all 0.55s linear;
+  width: 95%;
   &:hover {
-    border: 2px solid gray;
+    border: 2px solid rgb(56, 54, 54);
   }
+  align-items: center;
+  padding-bottom: 10%;
 }
 
 .userName {
-  font-size: xx-large;
+  font-size: 1.5rem;
   padding: 0.2rem;
   padding-left: 0.5rem;
 
   p {
-    color: #333;
+    color: #c0c0c0;
   }
 }
 
 .imageOverLay {
-  padding: 0.2rem;
+  margin-left: 0.5rem;
+  padding: 0;
   overflow: hidden;
   border-radius: 50%;
+  border: 2px solid #6d6a6a;
+  display: inline-flex;
+  width: fit-content;
+  height: fit-content;
+  max-width: 30%;
 }
 .userImage {
   border-radius: 50%;
@@ -51,7 +60,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   height: 70vh;
   p {
     color: #333;
@@ -63,33 +71,48 @@
   margin-left: -1rem;
   margin-right: -1rem;
   text-align: center;
-  background-color: #f0f0f0;
+  background-color: #252f47;
   height: 3rem;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.55s linear;
-
+  border-radius: 10 0 0 10;
   &:hover {
-    background-color: blanchedalmond;
+    background-color: #353d50;
+  }
+
+  p {
+    color: #c0c0c0;
   }
 }
 
 .chatButtonActive {
-  width: 110%;
+  width: 100%;
   margin-left: -1rem;
   margin-right: -1rem;
   text-align: center;
-  background-color: #d6cdcd;
+  background-color: #252f47;
   height: 3rem;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.55s linear;
-  border-right: 5px solid black;
-  border-radius: 0 8px 8px 0;
-
+  border-radius: 10 0 0 10;
+  border-right: 2px solid rgb(253, 167, 6);
   &:hover {
-    background-color: rgb(253, 167, 6);
+    background-color: #353d50;
   }
+
+  p {
+    color: #c0c0c0;
+  }
+}
+
+.chatLink {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center; /* vertical */
+  justify-content: center; /* horizontal */
 }
