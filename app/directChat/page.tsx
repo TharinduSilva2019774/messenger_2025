@@ -17,7 +17,7 @@ function DirectChatPage() {
   const [client, setClient] = useState<Client | null>(null);
   const searchParams = useSearchParams();
   const chatId = searchParams.get("id");
-
+  const [prevScrollHight, setPrevScrollHight] = useState(0);
   const sendMessage = (message: String, userId: String, chatId: String) => {
     if (client) {
       client.publish({
@@ -142,7 +142,20 @@ function DirectChatPage() {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages]);
+  }, [messages, prevScrollHight]);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    console.log(el);
+    if (el.scrollHeight != prevScrollHight) {
+      setPrevScrollHight(el.scrollHeight);
+      el.style.height = "auto";
+      el.style.height = `${prevScrollHight}px`;
+    }
+  }, [newMessage]);
 
   return (
     <div className={styles.mainContainer}>
@@ -167,20 +180,20 @@ function DirectChatPage() {
 
       <div className={styles.inputContainer}>
         <textarea
+          ref={textareaRef}
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyDown={handleKeyPress}
           placeholder="Type a new message..."
           className={styles.messageInput}
-          rows={3}
         />
-        <button
+        {/* <button
           onClick={handleSendMessage}
           disabled={!newMessage.trim()}
           className={styles.sendButton}
         >
           Send Message
-        </button>
+        </button> */}
       </div>
     </div>
   );
