@@ -142,19 +142,32 @@ function DirectChatPage() {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages, prevScrollHight]);
+    // Reset input height on new message
+    setInputHeight(40);
+  }, [messages]);
 
+  // Ref for the textarea input
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
+  // Function to adjust the height of the textarea based on content
+  const setInputHeight = (height?: Number) => {
     const el = textareaRef.current;
     if (!el) return;
     console.log(el);
-    if (el.scrollHeight != prevScrollHight) {
+    // If height is provided, set it directly
+    if (height) {
+      el.style.height = `${height}px`;
+    }
+    // Otherwise, auto-adjust based on scroll height
+    else if (el.scrollHeight != prevScrollHight) {
       setPrevScrollHight(el.scrollHeight);
-      el.style.height = "auto";
       el.style.height = `${prevScrollHight}px`;
     }
+  };
+
+  // Adjust input height when message is changing
+  useEffect(() => {
+    setInputHeight();
   }, [newMessage]);
 
   return (
