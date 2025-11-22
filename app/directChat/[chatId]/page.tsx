@@ -1,22 +1,21 @@
 "use client";
-import { useEffect, useState, useRef, Suspense } from "react";
+import { useEffect, useState, useRef, Suspense, use } from "react";
 
 import styles from "./page.module.css";
-import ChatMessage, { MessageModel } from "../Components/ChatMessage";
-import { getAllMessages, postMessage } from "../lib/api";
-import { toUiMessage, setCurrentClarkId } from "../lib/mapper";
+import ChatMessage, { MessageModel } from "../../Components/ChatMessage";
+import { getAllMessages, postMessage } from "../../lib/api";
+import { toUiMessage, setCurrentClarkId } from "../../lib/mapper";
 import { useUser } from "@clerk/nextjs";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { useSearchParams } from "next/navigation";
+type Props = { params: Promise<{ chatId: string }> };
 
-function DirectChatPage() {
+function DirectChatPage({ params }: Props) {
   const [messages, setMessages] = useState<MessageModel[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const { user } = useUser();
   const [client, setClient] = useState<Client | null>(null);
-  const searchParams = useSearchParams();
-  const chatId = searchParams.get("id");
+  const { chatId } = use(params);
   const [prevScrollHight, setPrevScrollHight] = useState(0);
   const sendMessage = (message: String, userId: String, chatId: String) => {
     if (client) {
@@ -122,11 +121,15 @@ function DirectChatPage() {
   };
 
   useEffect(() => {
+    console.log("Fetching messages for chatId:", chatId);
     if (user?.id) {
       getAllUIMessages();
     }
   }, [chatId, user?.id]);
 
+  useEffect(() => {
+    console.log("Fetching messages for chatId:", chatId);
+  }, []);
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -142,19 +145,32 @@ function DirectChatPage() {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages, prevScrollHight]);
+    // Reset input height on new message
+    setInputHeight(40);
+  }, [messages]);
 
+  // Ref for the textarea input
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
+  // Function to adjust the height of the textarea based on content
+  const setInputHeight = (height?: Number) => {
     const el = textareaRef.current;
     if (!el) return;
     console.log(el);
-    if (el.scrollHeight != prevScrollHight) {
+    // If height is provided, set it directly
+    if (height) {
+      el.style.height = `${height}px`;
+    }
+    // Otherwise, auto-adjust based on scroll height
+    else if (el.scrollHeight != prevScrollHight && el.scrollHeight > 30) {
       setPrevScrollHight(el.scrollHeight);
-      el.style.height = "auto";
       el.style.height = `${prevScrollHight}px`;
     }
+  };
+
+  // Adjust input height when message is changing
+  useEffect(() => {
+    setInputHeight();
   }, [newMessage]);
 
   return (
@@ -199,10 +215,10 @@ function DirectChatPage() {
   );
 }
 
-export default function Page() {
+export default function Page(props: Props) {
   return (
     <Suspense fallback={<div>Loading chat...</div>}>
-      <DirectChatPage />
+      <DirectChatPage {...props} />
     </Suspense>
   );
 }

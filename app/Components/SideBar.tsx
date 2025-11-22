@@ -3,7 +3,7 @@ import styles from "./SideBar.module.css";
 import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getAllChats } from "../lib/api";
 import { ChatDto } from "../lib/mapper";
@@ -66,10 +66,7 @@ function SideBar() {
                 : styles.chatButton
             }
           >
-            <Link
-              href={`/directChat?id=${chat.id}`}
-              className={styles.chatLink}
-            >
+            <Link href={`/directChat/${chat.id}`} className={styles.chatLink}>
               <div className={styles.chatInfo}>
                 <p className={styles.chatName}>{chat.name}</p>
               </div>

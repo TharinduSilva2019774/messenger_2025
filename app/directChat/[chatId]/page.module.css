@@ -30,14 +30,16 @@
 
 .messageInput {
   color: #333;
-  width: 95%;
-  border: 2px solid #e9ecef;
+  width: 100%;
+  border: 2px solid rgb(253, 167, 6);
   border-radius: 12px;
   padding: 5px;
   font-size: 1rem;
   font-family: inherit;
   resize: vertical;
   transition: border-color 0.2s ease;
+  min-height: 40px;
+  max-height: 40vh;
 }
 
 .messageInput:focus {
