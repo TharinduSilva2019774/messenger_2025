@@ -8,6 +8,7 @@ import { toUiMessage, setCurrentClarkId } from "../../lib/mapper";
 import { useUser } from "@clerk/nextjs";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { emojis } from "@/app/lib/emoji";
 type Props = { params: Promise<{ chatId: string }> };
 
 function DirectChatPage({ params }: Props) {
@@ -17,6 +18,8 @@ function DirectChatPage({ params }: Props) {
   const [client, setClient] = useState<Client | null>(null);
   const { chatId } = use(params);
   const [prevScrollHight, setPrevScrollHight] = useState(0);
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [buttonEmoji, setButtonEmoji] = useState("😅");
   const sendMessage = (message: String, userId: String, chatId: String) => {
     if (client) {
       client.publish({
@@ -137,6 +140,17 @@ function DirectChatPage({ params }: Props) {
     }
   };
 
+  useEffect(() => {
+    if (!emojis.length) return;
+
+    let i = 0; // start at current index (0 = first emoji)
+    const id = setInterval(() => {
+      i = (i + 1) % emojis.length;
+      setButtonEmoji(emojis[i]);
+    }, 1000);
+
+    return () => clearInterval(id);
+  }, []);
   // Ref for the messages list container
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -195,6 +209,18 @@ function DirectChatPage({ params }: Props) {
       </div>
 
       <div className={styles.inputContainer}>
+        <div>
+          <span
+            className={styles.emoji_button}
+            onClick={() => {
+              setShowEmoji(!showEmoji);
+              setInputHeight();
+            }}
+          >
+            {buttonEmoji}
+          </span>
+        </div>
+
         <textarea
           ref={textareaRef}
           value={newMessage}
@@ -203,14 +229,29 @@ function DirectChatPage({ params }: Props) {
           placeholder="Type a new message..."
           className={styles.messageInput}
         />
-        {/* <button
-          onClick={handleSendMessage}
-          disabled={!newMessage.trim()}
-          className={styles.sendButton}
-        >
-          Send Message
-        </button> */}
       </div>
+      <div
+        className={`${styles.emojiContainer} ${
+          showEmoji ? styles.emojiContainerOpen : ""
+        }`}
+      >
+        <div className={styles.emoji_list}>
+          {emojis.map((emoji, index) => (
+            <span
+              key={index}
+              className={styles.emoji_item}
+              onClick={() => {
+                setNewMessage((prev) => prev + emoji);
+                setInputHeight();
+              }}
+            >
+              {emoji}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="emojiBox"></div>
     </div>
   );
 }
