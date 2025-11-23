@@ -4,6 +4,7 @@
   flex-direction: column;
   width: 100vw;
   height: 100vh;
+  transition: all 0.55s linear;
 }
 
 .chatContainer {
@@ -49,31 +50,40 @@
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.sendButton {
-  width: 10%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 12px 24px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-  max-height: 80px;
-  height: 80px;
-}
-
-.sendButton:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-}
-
 .sendButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+.emoji_button {
+  font-size: 1.5rem;
+  cursor: pointer;
+  margin-right: 10px;
+  user-select: none;
+  transition: all 0.55s linear;
+}
+.emojiContainer {
+  display: flex;
+  background: #fff;
+  opacity: 0;
+  transform: translateY(8px);
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 180ms ease, transform 180ms ease, max-height 180ms ease;
+}
+
+.emojiContainerOpen {
+  opacity: 1;
+  transform: translateY(0);
+  max-height: 200px; /* or whatever fits your list */
+}
+
+.emoji_list {
+}
+
+.emoji_item {
+  cursor: pointer;
+  transition: all 0.55s linear;
 }
 
 .features {
