@@ -1,3 +1,5 @@
+import { useAuth } from "@clerk/nextjs";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER || "http://localhost:8080";
 
 export async function request(path: String, init?: RequestInit) {
@@ -44,3 +46,14 @@ export const postUser = async (
     body: JSON.stringify({ firstName, lastName, clarkId }),
   });
 };
+
+export async function fetchWithAuth(url: string, init: RequestInit = {}) {
+  const { getToken } = useAuth();
+  const token = await getToken(); // on server; client-side uses different helper (or avoid on client)
+  const headers = {
+    "Content-Type": "application/json",
+    ...(init.headers || {}),
+    Authorization: `Bearer ${token}`,
+  };
+  return fetch(url, { ...init, headers });
+}

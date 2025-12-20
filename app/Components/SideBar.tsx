@@ -1,6 +1,8 @@
 "use client";
 import styles from "./SideBar.module.css";
 import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
+
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -10,6 +12,7 @@ import { ChatDto } from "../lib/mapper";
 
 function SideBar() {
   const { user } = useUser();
+  const { getToken } = useAuth();
 
   const [chats, setChats] = useState<ChatDto[]>([]);
 
@@ -25,6 +28,8 @@ function SideBar() {
 
   useEffect(() => {
     const fetchChats = async () => {
+      const token = await getToken(); // Clerk session JWT
+      console.log("Fetched token:", token);
       if (user) {
         const chatList = await getAllChats(user.id);
         setChats(chatList.getChatDtoList);
