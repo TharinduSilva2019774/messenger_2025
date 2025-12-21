@@ -28,17 +28,6 @@ export async function request(path: String, init?: RequestInit) {
   }
 }
 
-// export async function fetchWithAuth(url: string, init: RequestInit = {}) {
-//   const { getToken } = useAuth();
-//   const token = await getToken(); // on server; client-side uses different helper (or avoid on client)
-//   const headers = {
-//     "Content-Type": "application/json",
-//     ...(init.headers || {}),
-//     Authorization: `Bearer ${token}`,
-//   };
-//   return fetch(url, { ...init, headers });
-// }
-
 export const getAllMessages = async (clarkId: String, chatId: String) =>
   await request(`/messages?userId=${clarkId}&chatId=${chatId}`, {
     method: "GET",
