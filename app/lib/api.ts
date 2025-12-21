@@ -1,10 +1,17 @@
-import { useAuth } from "@clerk/nextjs";
+"use server";
+
+import { auth } from "@clerk/nextjs/server";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER || "http://localhost:8080";
 
 export async function request(path: String, init?: RequestInit) {
+  const { getToken } = await auth();
+  const token = await getToken();
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
     ...init,
   });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -20,6 +27,17 @@ export async function request(path: String, init?: RequestInit) {
     return await response.text();
   }
 }
+
+// export async function fetchWithAuth(url: string, init: RequestInit = {}) {
+//   const { getToken } = useAuth();
+//   const token = await getToken(); // on server; client-side uses different helper (or avoid on client)
+//   const headers = {
+//     "Content-Type": "application/json",
+//     ...(init.headers || {}),
+//     Authorization: `Bearer ${token}`,
+//   };
+//   return fetch(url, { ...init, headers });
+// }
 
 export const getAllMessages = async (clarkId: String, chatId: String) =>
   await request(`/messages?userId=${clarkId}&chatId=${chatId}`, {
@@ -46,14 +64,3 @@ export const postUser = async (
     body: JSON.stringify({ firstName, lastName, clarkId }),
   });
 };
-
-export async function fetchWithAuth(url: string, init: RequestInit = {}) {
-  const { getToken } = useAuth();
-  const token = await getToken(); // on server; client-side uses different helper (or avoid on client)
-  const headers = {
-    "Content-Type": "application/json",
-    ...(init.headers || {}),
-    Authorization: `Bearer ${token}`,
-  };
-  return fetch(url, { ...init, headers });
-}
