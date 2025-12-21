@@ -34,7 +34,9 @@ export default function RootLayout({
         <AppInitializer>
           <GlobalProvider>
             <body className=" flex h-full min-h-screen transition-all duration-300 ease-in-out">
-              <Suspense fallback={<div className="w-64 bg-gray-100">Loading...</div>}>
+              <Suspense
+                fallback={<div className="w-64 bg-gray-100">Loading...</div>}
+              >
                 <SideBar />
               </Suspense>
               {children}

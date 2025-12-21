@@ -1,8 +1,17 @@
+"use server";
+
+import { auth } from "@clerk/nextjs/server";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER || "http://localhost:8080";
 
 export async function request(path: String, init?: RequestInit) {
+  const { getToken } = await auth();
+  const token = await getToken();
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
     ...init,
   });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
