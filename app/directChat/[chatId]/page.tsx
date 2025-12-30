@@ -9,6 +9,7 @@ import { useUser } from "@clerk/nextjs";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { emojis } from "@/app/lib/emoji";
+import { useAuth } from "@clerk/nextjs";
 type Props = { params: Promise<{ chatId: string }> };
 
 function DirectChatPage({ params }: Props) {
@@ -20,6 +21,7 @@ function DirectChatPage({ params }: Props) {
   const [prevScrollHight, setPrevScrollHight] = useState(0);
   const [showEmoji, setShowEmoji] = useState(false);
   const [buttonEmoji, setButtonEmoji] = useState("😅");
+  const { getToken } = useAuth();
   const sendMessage = (message: String, userId: String, chatId: String) => {
     if (client) {
       client.publish({
@@ -46,40 +48,46 @@ function DirectChatPage({ params }: Props) {
   useEffect(() => {
     // Establish a connection to the Spring Boot WebSocket endpoint using SockJS
     // Use environment variable for WebSocket server address
-    const wsServer =
-      process.env.NEXT_PUBLIC_WS_SERVER || "http://localhost:8080/ws";
-    const sock = new SockJS(wsServer);
-    // Create a STOMP client for messaging over the WebSocket
-    const stompClient = new Client({
-      webSocketFactory: () => sock, // Use SockJS for WebSocket fallback support
-      reconnectDelay: 5000, // Try to reconnect every 5 seconds if disconnected
-      onConnect: () => {
-        // Callback when STOMP connection is established
-        console.log("Connected to STOMP");
+    const connect = async () => {
+      const token = await getToken();
+      const wsServer =
+        process.env.NEXT_PUBLIC_WS_SERVER || "http://localhost:8080/ws";
+      const sock = new SockJS(wsServer);
+      // Create a STOMP client for messaging over the WebSocket
+      const stompClient = new Client({
+        webSocketFactory: () => sock, // Use SockJS for WebSocket fallback support
+        reconnectDelay: 5000, // Try to reconnect every 5 seconds if disconnected
+        connectHeaders: {
+          Authorization: `Bearer ${token}`,
+        },
+        onConnect: () => {
+          // Callback when STOMP connection is established
+          console.log("Connected to STOMP");
 
-        // Subscribe to the '/topic/messages' channel to receive broadcasted messages
-        stompClient.subscribe("/topic/messages", (msg) => {
-          // Parse the incoming message body from JSON
-          const body = JSON.parse(msg.body);
-          // Example: log the received message payload
-          console.log(body);
-          // Map the received message responses to UI message format
-          const mapped = body.messageResponses.map(toUiMessage);
-          const last = mapped.at(-1); // or use mapped[mapped.length-1]
-          if (last.isOwnMessage === false) {
-            playSound();
-          }
-          // Update the local state with the new messages
-          setMessages(mapped);
-        });
-      },
-    });
+          // Subscribe to the '/topic/messages' channel to receive broadcasted messages
+          stompClient.subscribe("/topic/messages", (msg) => {
+            // Parse the incoming message body from JSON
+            const body = JSON.parse(msg.body);
+            // Example: log the received message payload
+            console.log(body);
+            // Map the received message responses to UI message format
+            const mapped = body.messageResponses.map(toUiMessage);
+            const last = mapped.at(-1); // or use mapped[mapped.length-1]
+            if (last.isOwnMessage === false) {
+              playSound();
+            }
+            // Update the local state with the new messages
+            setMessages(mapped);
+          });
+        },
+      });
 
-    stompClient.activate();
-    setClient(stompClient);
+      stompClient.activate();
+      setClient(stompClient);
 
-    return () => {
-      stompClient.deactivate();
+      return () => {
+        stompClient.deactivate();
+      };
     };
   }, []);
 
