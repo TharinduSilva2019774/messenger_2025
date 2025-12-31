@@ -7,6 +7,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER || "http://localhost:8080";
 export async function request(path: String, init?: RequestInit) {
   const { getToken } = await auth();
   const token = await getToken();
+  console.log("API Token:", token);
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: {
       "Content-Type": "application/json",
@@ -53,3 +54,17 @@ export const postUser = async (
     body: JSON.stringify({ firstName, lastName, clarkId }),
   });
 };
+
+export const postKey = async (
+  key: string,
+  deviceUID: string,
+  clarkId: string
+) => {
+  return await request("/key", {
+    method: "POST",
+    body: JSON.stringify({ key, deviceUID, clarkId }),
+  });
+};
+
+export const getPublickey = async (deviceUID: String) =>
+  await request(`/key?deviceUID=${deviceUID}`, { method: "GET" });
