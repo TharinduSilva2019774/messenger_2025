@@ -31,6 +31,7 @@ function SideBar() {
         initCrypto(user.id);
         const chatList = await getAllChats(user.id);
         setChats(chatList.getChatDtoList);
+        console.log("Fetched chats:", chatList);
       }
     };
     fetchChats();

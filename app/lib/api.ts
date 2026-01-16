@@ -66,5 +66,5 @@ export const postKey = async (
   });
 };
 
-export const getPublickey = async (deviceUID: String) =>
-  await request(`/key?deviceUID=${deviceUID}`, { method: "GET" });
+export const getPublickey = async (clarkId: String) =>
+  await request(`/key?clarkId=${clarkId}`, { method: "GET" });
