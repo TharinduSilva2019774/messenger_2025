@@ -3,7 +3,7 @@ import { useEffect, useState, useRef, Suspense, use } from "react";
 
 import styles from "./page.module.css";
 import ChatMessage, { MessageModel } from "../../Components/ChatMessage";
-import { getAllMessages, postMessage } from "../../lib/api";
+import { getAllMessages, getChatDetail, postMessage } from "../../lib/api";
 import { toUiMessage, setCurrentClarkId } from "../../lib/mapper";
 import { useUser } from "@clerk/nextjs";
 import { Client } from "@stomp/stompjs";
@@ -123,7 +123,8 @@ function DirectChatPage({ params }: Props) {
   const getAllUIMessages = async () => {
     if (user) {
       const apiMessages = await getAllMessages(user.id, chatId ?? "");
-      console.log(apiMessages);
+      const chatDetails = await getChatDetail(chatId);
+      console.log("Chat Details:", chatDetails);
       const mapped = apiMessages.messageResponses.map(toUiMessage);
       setMessages(mapped);
     }
@@ -136,9 +137,6 @@ function DirectChatPage({ params }: Props) {
     }
   }, [chatId, user?.id]);
 
-  useEffect(() => {
-    console.log("Fetching messages for chatId:", chatId);
-  }, []);
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();

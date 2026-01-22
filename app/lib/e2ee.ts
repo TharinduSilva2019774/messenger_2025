@@ -95,7 +95,6 @@ export async function getDeviceId() {
     deviceId = generateDeviceId();
     await database.put("meta", deviceId, "deviceId");
   }
-
   return deviceId;
 }
 
@@ -111,4 +110,35 @@ export async function initCrypto(clarkId: string) {
     const deviceId = await getDeviceId();
     postKey(publicKey, deviceId, clarkId);
   }
+}
+
+export async function encryptMessage(publicKey: CryptoKey, message: string) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(message);
+
+  const encrypted = await crypto.subtle.encrypt(
+    {
+      name: "RSA-OAEP",
+    },
+    publicKey,
+    data
+  );
+
+  return encrypted; // ArrayBuffer
+}
+
+async function decryptMessage(
+  privateKey: CryptoKey,
+  encryptedData: ArrayBuffer
+) {
+  const decrypted = await crypto.subtle.decrypt(
+    {
+      name: "RSA-OAEP",
+    },
+    privateKey,
+    encryptedData
+  );
+
+  const decoder = new TextDecoder();
+  return decoder.decode(decrypted);
 }
