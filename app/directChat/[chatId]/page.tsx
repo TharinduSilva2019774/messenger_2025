@@ -3,13 +3,14 @@ import { useEffect, useState, useRef, Suspense, use } from "react";
 
 import styles from "./page.module.css";
 import ChatMessage, { MessageModel } from "../../Components/ChatMessage";
-import { getAllMessages, getChatDetail, postMessage } from "../../lib/api";
+import { getAllMessages, getChatDetail } from "../../lib/api";
 import { toUiMessage, setCurrentClarkId } from "../../lib/mapper";
 import { useUser } from "@clerk/nextjs";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { emojis } from "@/app/lib/emoji";
 import { useAuth } from "@clerk/nextjs";
+import { encryptMessage, importPublicKey } from "@/app/lib/e2ee";
 type Props = { params: Promise<{ chatId: string }> };
 
 function DirectChatPage({ params }: Props) {
@@ -22,14 +23,68 @@ function DirectChatPage({ params }: Props) {
   const [showEmoji, setShowEmoji] = useState(false);
   const [buttonEmoji, setButtonEmoji] = useState("😅");
   const { getToken } = useAuth();
-  const sendMessage = (message: String, userId: String, chatId: String) => {
+  const [reciverClarkId, setReciverClarkId] = useState("");
+  const [senderPKey, setsenderPKey] = useState("");
+  const [reciverPKey, setReciverPKey] = useState("");
+  const sendMessage = async (
+    message: string,
+    userId: String,
+    chatId: String,
+  ) => {
     if (client) {
+      // Helper function to convert ArrayBuffer to base64
+      const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
+        const bytes = new Uint8Array(buffer);
+        let binary = "";
+        for (let i = 0; i < bytes.byteLength; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
+      };
+
+      console.log("Sender Key:", senderPKey);
+      const sPublicKey = importPublicKey(senderPKey);
+      const sEncryptedMessageBuffer = await encryptMessage(
+        await sPublicKey,
+        message,
+      );
+      const sEncryptedMessage = arrayBufferToBase64(sEncryptedMessageBuffer);
+      console.log("Encrypted Message for Receiver:", sEncryptedMessage);
+      console.log(
+        "Encrypted buffer Message for Receiver:",
+        sEncryptedMessageBuffer,
+      );
+      // first user encryption
       client.publish({
         destination: "/app/chat.send",
         body: JSON.stringify({
           clarkId: userId,
-          message: message,
+          message: sEncryptedMessage,
           chatId: chatId,
+          encClarkId: userId,
+        }),
+      });
+
+      console.log("Sender Key:", reciverPKey);
+      const rPublicKey = importPublicKey(reciverPKey);
+      const rEncryptedMessageBuffer = await encryptMessage(
+        await rPublicKey,
+        message,
+      );
+      const rEncryptedMessage = arrayBufferToBase64(rEncryptedMessageBuffer);
+      console.log("Encrypted Message for Receiver:", rEncryptedMessage);
+      console.log(
+        "Encrypted buffer Message for Receiver:",
+        rEncryptedMessageBuffer,
+      );
+      // second user encryption
+      client.publish({
+        destination: "/app/chat.send",
+        body: JSON.stringify({
+          clarkId: userId,
+          message: rEncryptedMessage,
+          chatId: chatId,
+          encClarkId: reciverClarkId,
         }),
       });
     }
@@ -96,8 +151,8 @@ function DirectChatPage({ params }: Props) {
   const handleEdit = (messageId: string, newMessageText: string) => {
     setMessages((prev) =>
       prev.map((msg) =>
-        msg.id === messageId ? { ...msg, message: newMessageText } : msg
-      )
+        msg.id === messageId ? { ...msg, message: newMessageText } : msg,
+      ),
     );
   };
 
@@ -124,7 +179,18 @@ function DirectChatPage({ params }: Props) {
     if (user) {
       const apiMessages = await getAllMessages(user.id, chatId ?? "");
       const chatDetails = await getChatDetail(chatId);
-      console.log("Chat Details:", chatDetails);
+
+      const reciver =
+        chatDetails.userDetailsDtoList[0].clarkId === user.id
+          ? chatDetails.userDetailsDtoList[1]
+          : chatDetails.userDetailsDtoList[0];
+      setReciverClarkId(reciver.clarkId);
+      setReciverPKey(reciver.publicKey);
+      setsenderPKey(
+        chatDetails.userDetailsDtoList[0].clarkId === user.id
+          ? chatDetails.userDetailsDtoList[0].publicKey
+          : chatDetails.userDetailsDtoList[1].publicKey,
+      );
       const mapped = apiMessages.messageResponses.map(toUiMessage);
       setMessages(mapped);
     }

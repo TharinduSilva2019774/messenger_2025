@@ -38,13 +38,37 @@ export async function generateKeyPair() {
       hash: "SHA-256",
     },
     true, // extractable
-    ["encrypt", "decrypt"]
+    ["encrypt", "decrypt"],
   );
 }
 
 export async function exportPublicKey(publicKey: CryptoKey) {
   const spki = await crypto.subtle.exportKey("spki", publicKey);
   return btoa(String.fromCharCode(...new Uint8Array(spki)));
+}
+
+export async function importPublicKey(publicKeyString: string) {
+  if (!publicKeyString) {
+    throw new Error("Public key string is empty");
+  }
+  // Remove whitespace and newlines from the base64 string
+  const cleanedString = publicKeyString.replace(/\s/g, "");
+  const binaryString = atob(cleanedString);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+
+  return crypto.subtle.importKey(
+    "spki",
+    bytes.buffer,
+    {
+      name: "RSA-OAEP",
+      hash: "SHA-256",
+    },
+    true,
+    ["encrypt"],
+  );
 }
 
 export async function savePrivateKey(privateKey: CryptoKey) {
@@ -64,7 +88,7 @@ export async function loadPrivateKey() {
     jwk,
     { name: "RSA-OAEP", hash: "SHA-256" },
     false,
-    ["decrypt"]
+    ["decrypt"],
   );
 }
 
@@ -106,7 +130,6 @@ export async function initCrypto(clarkId: string) {
     const keyPair = await generateKeyPair();
     await savePrivateKey(keyPair.privateKey);
     const publicKey = await exportPublicKey(keyPair.publicKey);
-    console.log("Generated public key:", publicKey);
     const deviceId = await getDeviceId();
     postKey(publicKey, deviceId, clarkId);
   }
@@ -121,22 +144,23 @@ export async function encryptMessage(publicKey: CryptoKey, message: string) {
       name: "RSA-OAEP",
     },
     publicKey,
-    data
+    data,
   );
 
+  console.log("Encrypted message:", encrypted);
   return encrypted; // ArrayBuffer
 }
 
 async function decryptMessage(
   privateKey: CryptoKey,
-  encryptedData: ArrayBuffer
+  encryptedData: ArrayBuffer,
 ) {
   const decrypted = await crypto.subtle.decrypt(
     {
       name: "RSA-OAEP",
     },
     privateKey,
-    encryptedData
+    encryptedData,
   );
 
   const decoder = new TextDecoder();
