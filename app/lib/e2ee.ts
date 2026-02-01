@@ -81,7 +81,9 @@ export async function loadPrivateKey() {
   const database = await db;
   const jwk = await database.get("keys", "private");
 
-  if (!jwk) return null;
+  if (!jwk) {
+    throw new Error("No private key found in database");
+  }
 
   return crypto.subtle.importKey(
     "jwk",
@@ -147,22 +149,47 @@ export async function encryptMessage(publicKey: CryptoKey, message: string) {
     data,
   );
 
-  console.log("Encrypted message:", encrypted);
-  return encrypted; // ArrayBuffer
+  const base64Encrypted = arrayBufferToBase64(encrypted);
+  console.log("Encrypted message:", base64Encrypted);
+  return base64Encrypted; // Return base64 string
 }
 
-async function decryptMessage(
+export async function decryptMessage(
   privateKey: CryptoKey,
-  encryptedData: ArrayBuffer,
+  encryptedDataString: string,
 ) {
-  const decrypted = await crypto.subtle.decrypt(
-    {
-      name: "RSA-OAEP",
-    },
-    privateKey,
-    encryptedData,
-  );
+  try {
+    const encryptedData = base64ToArrayBuffer(encryptedDataString);
+    const decrypted = await crypto.subtle.decrypt(
+      {
+        name: "RSA-OAEP",
+      },
+      privateKey,
+      encryptedData,
+    );
 
-  const decoder = new TextDecoder();
-  return decoder.decode(decrypted);
+    const decoder = new TextDecoder();
+    return decoder.decode(decrypted);
+  } catch (error) {
+    console.error("Decryption failed:", error);
+    return "[Decryption failed]";
+  }
+}
+
+export function arrayBufferToBase64(buffer: ArrayBuffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+export function base64ToArrayBuffer(base64: string): ArrayBuffer {
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes.buffer;
 }
