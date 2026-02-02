@@ -9,16 +9,13 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getAllChats } from "../lib/api";
 import { ChatDto } from "../lib/mapper";
+import { initCrypto } from "../lib/e2ee";
 
 function SideBar() {
   const { user } = useUser();
   const { getToken } = useAuth();
 
   const [chats, setChats] = useState<ChatDto[]>([]);
-
-  if (user) {
-    console.log(user);
-  }
 
   const { firstName, lastName, imageUrl } = user || {
     firstName: "",
@@ -31,9 +28,10 @@ function SideBar() {
       const token = await getToken(); // Clerk session JWT
       console.log("Fetched token:", token);
       if (user) {
+        initCrypto(user.id);
         const chatList = await getAllChats(user.id);
         setChats(chatList.getChatDtoList);
-        console.log(chatList.getChatDtoList);
+        console.log("Fetched chats:", chatList);
       }
     };
     fetchChats();

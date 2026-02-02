@@ -14,7 +14,17 @@ export async function request(path: String, init?: RequestInit) {
     },
     ...init,
   });
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  console.log("API Response Status:", response.status);
+  if (!response.ok) {
+    let errorBody = "";
+    try {
+      errorBody = await response.text();
+      console.error("API Error Response:", errorBody);
+    } catch (e) {
+      console.error("Failed to read error response body");
+    }
+    throw new Error(`HTTP ${response.status}: ${errorBody}`);
+  }
 
   // Check if response is empty or 204 No Content
   if (response.status === 204) return null;
@@ -46,10 +56,27 @@ export const getAllChats = async (clarkId: String) =>
 export const postUser = async (
   firstName: string,
   lastName: string,
-  clarkId: string
+  clarkId: string,
 ) => {
   return await request("/user", {
     method: "POST",
     body: JSON.stringify({ firstName, lastName, clarkId }),
   });
 };
+
+export const getChatDetail = async (chatId: String) =>
+  await request(`/chat/detail?id=${chatId}`, { method: "GET" });
+
+export const postKey = async (
+  key: string,
+  deviceUID: string,
+  clarkId: string,
+) => {
+  return await request("/key", {
+    method: "POST",
+    body: JSON.stringify({ key, deviceUID, clarkId }),
+  });
+};
+
+export const getPublickey = async (clarkId: String) =>
+  await request(`/key?clarkId=${clarkId}`, { method: "GET" });

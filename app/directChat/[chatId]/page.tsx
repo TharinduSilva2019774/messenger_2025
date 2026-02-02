@@ -3,13 +3,19 @@ import { useEffect, useState, useRef, Suspense, use } from "react";
 
 import styles from "./page.module.css";
 import ChatMessage, { MessageModel } from "../../Components/ChatMessage";
-import { getAllMessages, postMessage } from "../../lib/api";
+import { getAllMessages, getChatDetail } from "../../lib/api";
 import { toUiMessage, setCurrentClarkId } from "../../lib/mapper";
 import { useUser } from "@clerk/nextjs";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { emojis } from "@/app/lib/emoji";
 import { useAuth } from "@clerk/nextjs";
+import {
+  decryptMessage,
+  encryptMessage,
+  importPublicKey,
+  loadPrivateKey,
+} from "@/app/lib/e2ee";
 type Props = { params: Promise<{ chatId: string }> };
 
 function DirectChatPage({ params }: Props) {
@@ -22,14 +28,50 @@ function DirectChatPage({ params }: Props) {
   const [showEmoji, setShowEmoji] = useState(false);
   const [buttonEmoji, setButtonEmoji] = useState("😅");
   const { getToken } = useAuth();
-  const sendMessage = (message: String, userId: String, chatId: String) => {
+  const [reciverClarkId, setReciverClarkId] = useState("");
+  const [reciverUserId, setReciverUserId] = useState("");
+  const [senderPKey, setsenderPKey] = useState("");
+  const [reciverPKey, setReciverPKey] = useState("");
+  const sendMessage = async (
+    message: string,
+    userId: String,
+    chatId: String,
+  ) => {
     if (client) {
+      // Helper function to convert ArrayBuffer to base64
+
+      const sPublicKey = importPublicKey(senderPKey);
+      const sEncryptedMessageBuffer = await encryptMessage(
+        await sPublicKey,
+        message,
+      );
+
+      // first user encryption
       client.publish({
         destination: "/app/chat.send",
         body: JSON.stringify({
           clarkId: userId,
-          message: message,
+          message: sEncryptedMessageBuffer,
           chatId: chatId,
+          encClarkId: userId,
+        }),
+      });
+
+      const rPublicKey = importPublicKey(reciverPKey);
+      const rEncryptedMessageBuffer = await encryptMessage(
+        await rPublicKey,
+        message,
+      );
+      // const rEncryptedMessage = arrayBufferToBase64(rEncryptedMessageBuffer);
+      // console.log("Encrypted Message for Receiver:", rEncryptedMessage);
+      // second user encryption
+      client.publish({
+        destination: "/app/chat.send",
+        body: JSON.stringify({
+          clarkId: userId,
+          message: rEncryptedMessageBuffer,
+          chatId: chatId,
+          encClarkId: reciverClarkId,
         }),
       });
     }
@@ -64,15 +106,43 @@ function DirectChatPage({ params }: Props) {
         console.log("Connected to STOMP");
 
         // Subscribe to the '/topic/messages' channel to receive broadcasted messages
-        stompClient.subscribe("/topic/messages", (msg) => {
+        stompClient.subscribe("/topic/messages", async (msg) => {
           // Parse the incoming message body from JSON
           const body = JSON.parse(msg.body);
           // Example: log the received message payload
           console.log(body);
+          // filtering messages for with encrypted ClarkId matching current user
+          const filtered = body.messageResponses.filter(
+            (m: any) => m.encClarkId === user?.id,
+          );
+          console.log("1 identified sender:", user?.id);
+          console.log("1 Filtered Messages:", filtered);
+
+          // Decrypt the message bodies
+          const privateKey = await loadPrivateKey();
+
+          const decryptedMessages = await Promise.all(
+            filtered.map(async (m: any) => {
+              try {
+                const decryptedText = await decryptMessage(
+                  privateKey,
+                  m.message,
+                );
+                return {
+                  ...m,
+                  message: decryptedText,
+                };
+              } catch (error) {
+                console.error("Failed to decrypt message:", error);
+                return m; // Return original if decryption fails
+              }
+            }),
+          );
+
           // Map the received message responses to UI message format
-          const mapped = body.messageResponses.map(toUiMessage);
+          const mapped = decryptedMessages.map(toUiMessage);
           const last = mapped.at(-1); // or use mapped[mapped.length-1]
-          if (last.isOwnMessage === false) {
+          if (last?.isOwnMessage === false) {
             playSound();
           }
           // Update the local state with the new messages
@@ -96,8 +166,8 @@ function DirectChatPage({ params }: Props) {
   const handleEdit = (messageId: string, newMessageText: string) => {
     setMessages((prev) =>
       prev.map((msg) =>
-        msg.id === messageId ? { ...msg, message: newMessageText } : msg
-      )
+        msg.id === messageId ? { ...msg, message: newMessageText } : msg,
+      ),
     );
   };
 
@@ -123,8 +193,45 @@ function DirectChatPage({ params }: Props) {
   const getAllUIMessages = async () => {
     if (user) {
       const apiMessages = await getAllMessages(user.id, chatId ?? "");
-      console.log(apiMessages);
-      const mapped = apiMessages.messageResponses.map(toUiMessage);
+      const chatDetails = await getChatDetail(chatId);
+
+      const reciver =
+        chatDetails.userDetailsDtoList[0].clarkId === user.id
+          ? chatDetails.userDetailsDtoList[1]
+          : chatDetails.userDetailsDtoList[0];
+      setReciverClarkId(reciver.clarkId);
+      setReciverUserId(reciver.id);
+      setReciverPKey(reciver.publicKey);
+      setsenderPKey(
+        chatDetails.userDetailsDtoList[0].clarkId === user.id
+          ? chatDetails.userDetailsDtoList[0].publicKey
+          : chatDetails.userDetailsDtoList[1].publicKey,
+      );
+
+      const filtered = apiMessages.messageResponses.filter(
+        (m: any) => m.encClarkId === user?.id,
+      );
+      console.log("2 identified sender:", user?.id);
+      console.log("2 Filtered Messages:", filtered);
+
+      // Decrypt the message bodies
+      const privateKey = await loadPrivateKey();
+      const decryptedMessages = await Promise.all(
+        filtered.map(async (m: any) => {
+          try {
+            const decryptedText = await decryptMessage(privateKey, m.message);
+            return {
+              ...m,
+              message: decryptedText,
+            };
+          } catch (error) {
+            console.error("Failed to decrypt message:", error);
+            return m; // Return original if decryption fails
+          }
+        }),
+      );
+
+      const mapped = decryptedMessages.map(toUiMessage);
       setMessages(mapped);
     }
   };
@@ -136,9 +243,6 @@ function DirectChatPage({ params }: Props) {
     }
   }, [chatId, user?.id]);
 
-  useEffect(() => {
-    console.log("Fetching messages for chatId:", chatId);
-  }, []);
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
