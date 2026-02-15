@@ -171,7 +171,7 @@ export async function decryptMessage(
     const decoder = new TextDecoder();
     return decoder.decode(decrypted);
   } catch (error) {
-    console.error("Decryption failed:", error);
+    console.warn("Decryption failed:", error);
     return "[Decryption failed]";
   }
 }
