@@ -160,6 +160,14 @@ function DirectChatPage({ params }: Props) {
   }, []);
 
   const handleDelete = (messageId: string) => {
+    console.log("Deleting message with ID:", messageId);
+    if (client) {
+      console.log("Publishing delete for message ID:", messageId);
+      client.publish({
+        destination: "/app/chat.delete",
+        body: JSON.stringify({ messageId: messageId }),
+      });
+    }
     setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
   };
 
@@ -309,7 +317,7 @@ function DirectChatPage({ params }: Props) {
               sender={msg.sender}
               timestamp={msg.timestamp}
               isOwnMessage={msg.isOwnMessage}
-              onDelete={handleDelete}
+              onDelete={() => handleDelete(msg.id)}
               onEdit={handleEdit}
             />
           ))}

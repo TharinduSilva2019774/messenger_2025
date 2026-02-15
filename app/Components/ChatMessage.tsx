@@ -34,7 +34,7 @@ function ChatMessage({
   const [isEditing, setIsEditing] = useState(false);
   const [editMessage, setEditMessage] = useState(message);
   const [showActions, setShowActions] = useState(false);
-
+  const [deleteTimeout, setDeleteTimeout] = useState(200);
   const handleEdit = () => {
     if (onEdit && editMessage.trim() !== message) {
       onEdit(messageId, editMessage.trim());
@@ -59,7 +59,9 @@ function ChatMessage({
         isOwnMessage ? styles.ownMessage : styles.otherMessage
       }`}
       onMouseEnter={() => setShowActions(true)}
-      onMouseLeave={() => setShowActions(false)}
+      onMouseLeave={() => {
+        setTimeout(() => setShowActions(false), deleteTimeout);
+      }}
     >
       <div className={styles.messageHeader}>
         <span className={styles.sender}>{isOwnMessage ? "You" : sender}</span>
@@ -78,9 +80,16 @@ function ChatMessage({
             ✏️
           </button>
           <button
-            // onClick={handleDelete}
+            onClick={handleDelete}
             className={`${styles.actionButton} ${styles.deleteButton}`}
             title="Delete message"
+            onMouseEnter={() => {
+              setShowActions(true);
+              setDeleteTimeout(10000);
+            }}
+            onMouseLeave={() => {
+              setTimeout(() => setShowActions(false), 500);
+            }}
           >
             🗑️
           </button>
