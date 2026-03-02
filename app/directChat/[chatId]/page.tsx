@@ -32,6 +32,7 @@ function DirectChatPage({ params }: Props) {
   const [reciverUserId, setReciverUserId] = useState("");
   const [senderPKey, setsenderPKey] = useState("");
   const [reciverPKey, setReciverPKey] = useState("");
+  const [aiContext, setAiContext] = useState<string[]>([]);
   const sendMessage = async (
     message: string,
     userId: String,
@@ -123,6 +124,9 @@ function DirectChatPage({ params }: Props) {
 
           const decryptedMessages = await Promise.all(
             filtered.map(async (m: any) => {
+              if (!m.encrypted) {
+                return m;
+              }
               try {
                 const decryptedText = await decryptMessage(
                   privateKey,
@@ -201,6 +205,7 @@ function DirectChatPage({ params }: Props) {
   const getAllUIMessages = async () => {
     if (user) {
       const apiMessages = await getAllMessages(user.id, chatId ?? "");
+      console.log("Fetched messages from API:", apiMessages);
       const chatDetails = await getChatDetail(chatId);
 
       const reciver =
@@ -226,6 +231,10 @@ function DirectChatPage({ params }: Props) {
       const privateKey = await loadPrivateKey();
       const decryptedMessages = await Promise.all(
         filtered.map(async (m: any) => {
+          if (!m.encrypted) {
+            console.log("Message is not encrypted, skipping decryption:", m);
+            return m;
+          }
           try {
             const decryptedText = await decryptMessage(privateKey, m.message);
             return {
@@ -241,6 +250,7 @@ function DirectChatPage({ params }: Props) {
 
       const mapped = decryptedMessages.map(toUiMessage);
       setMessages(mapped);
+      console.log("Decrypted and Mapped Messages:", mapped);
     }
   };
 
@@ -300,6 +310,22 @@ function DirectChatPage({ params }: Props) {
     }
   };
 
+  const addAiContext = (messageId: string, message: string) => {
+    const existingContext = aiContext.filter((m) =>
+      m.startsWith(`${messageId}:`),
+    );
+    if (existingContext.length > 0) {
+      // If context for this message already exists, remove it
+      setAiContext((prev) =>
+        prev.filter((m) => !m.startsWith(`${messageId}:`)),
+      );
+    } else {
+      // Otherwise, add new context
+      setAiContext((prev) => [...prev, `${messageId}:${message}`]);
+    }
+    console.log("Current AI Context:", aiContext);
+  };
+
   // Adjust input height when message is changing
   useEffect(() => {
     setInputHeight();
@@ -319,6 +345,7 @@ function DirectChatPage({ params }: Props) {
               isOwnMessage={msg.isOwnMessage}
               onDelete={() => handleDelete(msg.id)}
               onEdit={handleEdit}
+              onAddToAIContext={addAiContext}
             />
           ))}
           {/* Dummy div for auto-scroll */}

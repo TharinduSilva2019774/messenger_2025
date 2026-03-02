@@ -7,6 +7,7 @@ export interface ApiMessageDto {
   userFirstName: string;
   clarkId: string;
   chatId: string;
+  is_encrypted?: boolean;
 }
 
 export interface UiMessageDto {
@@ -16,6 +17,7 @@ export interface UiMessageDto {
   timestamp: string;
   isOwnMessage: boolean;
   chatId: string;
+  is_encrypted: boolean;
 }
 
 export interface ChatDto {
@@ -43,5 +45,6 @@ export function toUiMessage(api: ApiMessageDto): UiMessageDto {
     isOwnMessage:
       currentClarkId !== null ? currentClarkId === api.clarkId : false,
     chatId: api.chatId,
+    is_encrypted: api.is_encrypted || true,
   };
 }
