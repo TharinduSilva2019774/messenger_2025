@@ -55,6 +55,7 @@ function DirectChatPage({ params }: Props) {
           message: sEncryptedMessageBuffer,
           chatId: chatId,
           encClarkId: userId,
+          isEncrypted: true,
         }),
       });
 
@@ -73,6 +74,7 @@ function DirectChatPage({ params }: Props) {
           message: rEncryptedMessageBuffer,
           chatId: chatId,
           encClarkId: reciverClarkId,
+          isEncrypted: true,
         }),
       });
     }
@@ -199,6 +201,25 @@ function DirectChatPage({ params }: Props) {
       sendMessage(newMessage.trim(), user.id, chatId ?? "");
       setMessages((prev) => [...prev, newMsg]);
       setNewMessage("");
+    }
+  };
+
+  const handleAskAI = () => {
+    // Implementation for asking AI
+    const context = aiContext.sort().join("\n");
+    console.log("Asking AI with context:", context);
+
+    if (client) {
+      client.publish({
+        destination: "/app/chat.gpt",
+        body: JSON.stringify({
+          message: newMessage,
+          clarkId: user?.id,
+          chatId: chatId,
+          otherClarkId: reciverClarkId,
+          context: context,
+        }),
+      });
     }
   };
 
@@ -374,6 +395,9 @@ function DirectChatPage({ params }: Props) {
           placeholder="Type a new message..."
           className={styles.messageInput}
         />
+        <div className={styles.askAI_button} onClick={handleAskAI}>
+          test
+        </div>
       </div>
       <div
         className={`${styles.emojiContainer} ${
@@ -395,8 +419,6 @@ function DirectChatPage({ params }: Props) {
           ))}
         </div>
       </div>
-
-      <div className="emojiBox"></div>
     </div>
   );
 }
