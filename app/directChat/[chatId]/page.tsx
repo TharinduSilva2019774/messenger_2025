@@ -32,6 +32,7 @@ function DirectChatPage({ params }: Props) {
   const [reciverUserId, setReciverUserId] = useState("");
   const [senderPKey, setsenderPKey] = useState("");
   const [reciverPKey, setReciverPKey] = useState("");
+  const [aiContext, setAiContext] = useState<string[]>([]);
   const sendMessage = async (
     message: string,
     userId: String,
@@ -54,6 +55,7 @@ function DirectChatPage({ params }: Props) {
           message: sEncryptedMessageBuffer,
           chatId: chatId,
           encClarkId: userId,
+          isEncrypted: true,
         }),
       });
 
@@ -72,6 +74,7 @@ function DirectChatPage({ params }: Props) {
           message: rEncryptedMessageBuffer,
           chatId: chatId,
           encClarkId: reciverClarkId,
+          isEncrypted: true,
         }),
       });
     }
@@ -123,6 +126,9 @@ function DirectChatPage({ params }: Props) {
 
           const decryptedMessages = await Promise.all(
             filtered.map(async (m: any) => {
+              if (!m.encrypted) {
+                return m;
+              }
               try {
                 const decryptedText = await decryptMessage(
                   privateKey,
@@ -198,9 +204,29 @@ function DirectChatPage({ params }: Props) {
     }
   };
 
+  const handleAskAI = () => {
+    // Implementation for asking AI
+    const context = aiContext.sort().join("\n");
+    console.log("Asking AI with context:", context);
+
+    if (client) {
+      client.publish({
+        destination: "/app/chat.gpt",
+        body: JSON.stringify({
+          message: newMessage,
+          clarkId: user?.id,
+          chatId: chatId,
+          otherClarkId: reciverClarkId,
+          context: context,
+        }),
+      });
+    }
+  };
+
   const getAllUIMessages = async () => {
     if (user) {
       const apiMessages = await getAllMessages(user.id, chatId ?? "");
+      console.log("Fetched messages from API:", apiMessages);
       const chatDetails = await getChatDetail(chatId);
 
       const reciver =
@@ -226,6 +252,10 @@ function DirectChatPage({ params }: Props) {
       const privateKey = await loadPrivateKey();
       const decryptedMessages = await Promise.all(
         filtered.map(async (m: any) => {
+          if (!m.encrypted) {
+            console.log("Message is not encrypted, skipping decryption:", m);
+            return m;
+          }
           try {
             const decryptedText = await decryptMessage(privateKey, m.message);
             return {
@@ -241,6 +271,7 @@ function DirectChatPage({ params }: Props) {
 
       const mapped = decryptedMessages.map(toUiMessage);
       setMessages(mapped);
+      console.log("Decrypted and Mapped Messages:", mapped);
     }
   };
 
@@ -300,6 +331,22 @@ function DirectChatPage({ params }: Props) {
     }
   };
 
+  const addAiContext = (messageId: string, message: string) => {
+    const existingContext = aiContext.filter((m) =>
+      m.startsWith(`${messageId}:`),
+    );
+    if (existingContext.length > 0) {
+      // If context for this message already exists, remove it
+      setAiContext((prev) =>
+        prev.filter((m) => !m.startsWith(`${messageId}:`)),
+      );
+    } else {
+      // Otherwise, add new context
+      setAiContext((prev) => [...prev, `${messageId}:${message}`]);
+    }
+    console.log("Current AI Context:", aiContext);
+  };
+
   // Adjust input height when message is changing
   useEffect(() => {
     setInputHeight();
@@ -319,6 +366,7 @@ function DirectChatPage({ params }: Props) {
               isOwnMessage={msg.isOwnMessage}
               onDelete={() => handleDelete(msg.id)}
               onEdit={handleEdit}
+              onAddToAIContext={addAiContext}
             />
           ))}
           {/* Dummy div for auto-scroll */}
@@ -347,6 +395,9 @@ function DirectChatPage({ params }: Props) {
           placeholder="Type a new message..."
           className={styles.messageInput}
         />
+        <div className={styles.askAI_button} onClick={handleAskAI}>
+          test
+        </div>
       </div>
       <div
         className={`${styles.emojiContainer} ${
@@ -368,8 +419,6 @@ function DirectChatPage({ params }: Props) {
           ))}
         </div>
       </div>
-
-      <div className="emojiBox"></div>
     </div>
   );
 }

@@ -14,6 +14,7 @@
     "eslint-config-next": "^16.1.1",
     "idb": "^8.0.3",
     "next": "15.2.8",
+    "openai": "^6.22.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "sockjs-client": "^1.6.1"

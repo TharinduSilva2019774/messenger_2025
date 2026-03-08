@@ -10,6 +10,7 @@ interface ChatMessageProps {
   isOwnMessage?: boolean;
   onDelete?: (id: string) => void;
   onEdit?: (id: string, newMessage: string) => void;
+  onAddToAIContext?: (messageId: string, message: string) => void;
   messageId: string;
 }
 
@@ -29,9 +30,10 @@ function ChatMessage({
   isOwnMessage = false,
   onDelete,
   onEdit,
+  onAddToAIContext,
   messageId,
 }: ChatMessageProps) {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isAIContext, setIsAIContext] = useState(styles.editButton);
   const [editMessage, setEditMessage] = useState(message);
   const [showActions, setShowActions] = useState(false);
   const [deleteTimeout, setDeleteTimeout] = useState(200);
@@ -39,12 +41,6 @@ function ChatMessage({
     if (onEdit && editMessage.trim() !== message) {
       onEdit(messageId, editMessage.trim());
     }
-    setIsEditing(false);
-  };
-
-  const handleCancelEdit = () => {
-    setEditMessage(message);
-    setIsEditing(false);
   };
 
   const handleDelete = () => {
@@ -73,11 +69,14 @@ function ChatMessage({
       {showActions && (
         <div className={styles.actionButtons}>
           <button
-            // onClick={() => setIsEditing(true)}
-            className={`${styles.actionButton} ${styles.editButton}`}
-            title="Edit message"
+            onClick={() => {
+              onAddToAIContext?.(messageId, message);
+              setIsAIContext(styles.editButtonAfterClick);
+            }}
+            className={`${styles.actionButton} ${isAIContext}`}
+            title="AI context"
           >
-            ✏️
+            🦾
           </button>
           <button
             onClick={handleDelete}

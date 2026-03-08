@@ -110,6 +110,11 @@
   border-color: #2196f3;
 }
 
+.editButtonAfterClick {
+  background: #e3f2fd;
+  border-color: #00203a;
+}
+
 .deleteButton:hover {
   background: #ffebee;
   border-color: #f44336;
