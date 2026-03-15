@@ -26,7 +26,8 @@ function SideBar() {
   useEffect(() => {
     const fetchChats = async () => {
       const token = await getToken(); // Clerk session JWT
-      console.log("Fetched token:", token);
+      // console.log("Fetched token:", token);
+      // console.log("User ID for fetching chats:", user);
       if (user) {
         initCrypto(user.id);
         const chatList = await getAllChats(user.id);
