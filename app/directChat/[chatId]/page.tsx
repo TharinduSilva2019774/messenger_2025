@@ -396,7 +396,7 @@ function DirectChatPage({ params }: Props) {
           className={styles.messageInput}
         />
         <div className={styles.askAI_button} onClick={handleAskAI}>
-          test
+          🤖
         </div>
       </div>
       <div
