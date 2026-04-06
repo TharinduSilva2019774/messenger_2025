@@ -8,6 +8,7 @@ export interface ApiMessageDto {
   clarkId: string;
   chatId: string;
   is_encrypted?: boolean;
+  read?: boolean;
 }
 
 export interface UiMessageDto {
@@ -18,6 +19,7 @@ export interface UiMessageDto {
   isOwnMessage: boolean;
   chatId: string;
   is_encrypted: boolean;
+  isRead: boolean;
 }
 
 export interface ChatDto {
@@ -46,5 +48,6 @@ export function toUiMessage(api: ApiMessageDto): UiMessageDto {
       currentClarkId !== null ? currentClarkId === api.clarkId : false,
     chatId: api.chatId,
     is_encrypted: api.is_encrypted || true,
+    isRead: api.read || false,
   };
 }

@@ -12,6 +12,7 @@ interface ChatMessageProps {
   onEdit?: (id: string, newMessage: string) => void;
   onAddToAIContext?: (messageId: string, message: string) => void;
   messageId: string;
+  isRead: boolean;
 }
 
 // Sample data interface for testing
@@ -21,6 +22,7 @@ export interface MessageModel {
   sender: string;
   timestamp: string;
   isOwnMessage: boolean;
+  isRead: boolean;
 }
 
 function ChatMessage({
@@ -32,6 +34,7 @@ function ChatMessage({
   onEdit,
   onAddToAIContext,
   messageId,
+  isRead,
 }: ChatMessageProps) {
   const [isAIContext, setIsAIContext] = useState(styles.editButton);
   const [editMessage, setEditMessage] = useState(message);
@@ -48,7 +51,6 @@ function ChatMessage({
       onDelete(messageId);
     }
   };
-
   return (
     <div
       className={`${styles.messageContainer} ${
@@ -92,6 +94,14 @@ function ChatMessage({
           >
             🗑️
           </button>
+          {isOwnMessage ? <button
+            onClick={() => {}}
+            className={`${styles.actionButton} ${isAIContext}`}
+            title="AI context"
+          >
+            {isRead ? "✅" : "⏳"}  
+          </button> : null}
+          
         </div>
       )}
     </div>
