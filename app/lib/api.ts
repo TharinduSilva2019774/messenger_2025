@@ -38,8 +38,8 @@ export async function request(path: String, init?: RequestInit) {
   }
 }
 
-export const getAllMessages = async (clarkId: String, chatId: String) =>
-  await request(`/messages?userId=${clarkId}&chatId=${chatId}`, {
+export const getAllMessages = async (chatId: String) =>
+  await request(`/messages?chatId=${chatId}`, {
     method: "GET",
   });
 
@@ -80,3 +80,13 @@ export const postKey = async (
 
 export const getPublickey = async (clarkId: String) =>
   await request(`/key?clarkId=${clarkId}`, { method: "GET" });
+
+export const postIsRead = async (
+  messageList: any[],
+  newStatus: boolean,
+) => {
+  return await request("/messages/read", {
+    method: "PUT",
+    body: JSON.stringify({ messageList, newStatus }),
+  });
+};

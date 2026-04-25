@@ -3,7 +3,7 @@ import { useEffect, useState, useRef, Suspense, use } from "react";
 
 import styles from "./page.module.css";
 import ChatMessage, { MessageModel } from "../../Components/ChatMessage";
-import { getAllMessages, getChatDetail } from "../../lib/api";
+import { getAllMessages, getChatDetail, postIsRead } from "../../lib/api";
 import { toUiMessage, setCurrentClarkId } from "../../lib/mapper";
 import { useUser } from "@clerk/nextjs";
 import { Client } from "@stomp/stompjs";
@@ -16,6 +16,7 @@ import {
   importPublicKey,
   loadPrivateKey,
 } from "@/app/lib/e2ee";
+import { getMessageList } from "@/app/lib/utilFunc";
 type Props = { params: Promise<{ chatId: string }> };
 
 function DirectChatPage({ params }: Props) {
@@ -33,6 +34,7 @@ function DirectChatPage({ params }: Props) {
   const [senderPKey, setsenderPKey] = useState("");
   const [reciverPKey, setReciverPKey] = useState("");
   const [aiContext, setAiContext] = useState<string[]>([]);
+  const [aiReplyBuffer, setAiReplyBuffer] = useState(false);
   const sendMessage = async (
     message: string,
     userId: String,
@@ -40,7 +42,6 @@ function DirectChatPage({ params }: Props) {
   ) => {
     if (client) {
       // Helper function to convert ArrayBuffer to base64
-
       const sPublicKey = importPublicKey(senderPKey);
       const sEncryptedMessageBuffer = await encryptMessage(
         await sPublicKey,
@@ -153,6 +154,7 @@ function DirectChatPage({ params }: Props) {
           }
           // Update the local state with the new messages
           setMessages(mapped);
+          setAiReplyBuffer(false);
         });
       },
     });
@@ -196,6 +198,7 @@ function DirectChatPage({ params }: Props) {
           minute: "2-digit",
         }),
         isOwnMessage: true,
+        isRead: false,
       };
       // postMessage(newMessage.trim(),user.id);
       sendMessage(newMessage.trim(), user.id, chatId ?? "");
@@ -208,7 +211,7 @@ function DirectChatPage({ params }: Props) {
     // Implementation for asking AI
     const context = aiContext.sort().join("\n");
     console.log("Asking AI with context:", context);
-
+    setAiReplyBuffer(true);
     if (client) {
       client.publish({
         destination: "/app/chat.gpt",
@@ -223,9 +226,10 @@ function DirectChatPage({ params }: Props) {
     }
   };
 
+
   const getAllUIMessages = async () => {
     if (user) {
-      const apiMessages = await getAllMessages(user.id, chatId ?? "");
+      const apiMessages = await getAllMessages(chatId ?? "");
       console.log("Fetched messages from API:", apiMessages);
       const chatDetails = await getChatDetail(chatId);
 
@@ -273,6 +277,7 @@ function DirectChatPage({ params }: Props) {
       setMessages(mapped);
       console.log("Decrypted and Mapped Messages:", mapped);
     }
+     
   };
 
   useEffect(() => {
@@ -298,6 +303,68 @@ function DirectChatPage({ params }: Props) {
       setButtonEmoji(emojis[i]);
     }, 1000);
 
+    return () => clearInterval(id);
+  }, []);
+
+  const messagesRef = useRef(messages);
+  const reciverClarkIdRef = useRef(reciverClarkId);
+  const clientRef = useRef(client);
+
+  // 1. Keep the refs updated with the absolute latest state variables
+  useEffect(() => {
+    messagesRef.current = messages;
+    reciverClarkIdRef.current = reciverClarkId;
+    clientRef.current = client;
+  }, [messages, reciverClarkId]);
+
+  // 2. The interval reads from the ref, and never needs to restart because of missing dependencies
+  useEffect(() => {
+    const id = setInterval(async () => {
+      console.log("loop test list", messagesRef.current);
+      const messaegList = getMessageList(messagesRef.current, reciverClarkIdRef.current);
+      console.log("loop test", messaegList);
+
+      if(messaegList.length > 0){
+        console.log("1 Message List updated to read: ", messaegList);  
+         const apiMessages = await postIsRead(messaegList,true);
+         console.log("apiMessages", apiMessages);
+
+      const filtered = apiMessages.messageResponses.filter(
+        (m: any) => m.encClarkId === user?.id,
+      );
+      // console.log("2 identified sender:", user?.id);
+      // console.log("2 Filtered Messages:", filtered);
+
+      // // Decrypt the message bodies
+      // const privateKey = await loadPrivateKey();
+      // const decryptedMessages = await Promise.all(
+      //   filtered.map(async (m: any) => {
+      //     if (!m.encrypted) {
+      //       console.log("Message is not encrypted, skipping decryption:", m);
+      //       return m;
+      //     }
+      //     try {
+      //       const decryptedText = await decryptMessage(privateKey, m.message);
+      //       return {
+      //         ...m,
+      //         message: decryptedText,
+      //       };
+      //     } catch (error) {
+      //       console.error("Failed to decrypt message:", error);
+      //       return m; // Return original if decryption fails
+      //     }
+      //   }),
+      // );
+
+      // const mapped = decryptedMessages.map(toUiMessage);
+      // setMessages(mapped);
+      // console.log("Decrypted and Mapped Messages:", mapped);
+    }
+     
+    console.log("2 Message List updated to read:", messaegList);
+      
+    }, 5000);
+    
     return () => clearInterval(id);
   }, []);
   // Ref for the messages list container
@@ -364,6 +431,7 @@ function DirectChatPage({ params }: Props) {
               sender={msg.sender}
               timestamp={msg.timestamp}
               isOwnMessage={msg.isOwnMessage}
+              isRead={msg.isRead}
               onDelete={() => handleDelete(msg.id)}
               onEdit={handleEdit}
               onAddToAIContext={addAiContext}
@@ -396,7 +464,10 @@ function DirectChatPage({ params }: Props) {
           className={styles.messageInput}
         />
         <div className={styles.askAI_button} onClick={handleAskAI}>
-          🤖
+          {aiReplyBuffer ? (<span className={styles.loader}></span>) : (
+                      "🤖"
+          )}
+
         </div>
       </div>
       <div
